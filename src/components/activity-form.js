@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {TextInput} from "react-native-paper";
 
 class ActivityCard extends Component {
   state = {
@@ -9,11 +8,6 @@ class ActivityCard extends Component {
 
   render () {
     return <View style={styles.main}>
-      <TextInput
-        label='Email'
-        value={this.state.text}
-        onChangeText={text => this.setState({ text })}
-      />
     </View>;
   }
 }

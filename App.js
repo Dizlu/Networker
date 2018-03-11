@@ -6,15 +6,11 @@ import React, { Component } from 'react';
 import {
   FlatList,
   ScrollView,
-  StyleSheet,
-  View
+  StyleSheet
 } from 'react-native';
-import {
-  Card, CardContent, CardCover, Paragraph, Title, Toolbar,
-  ToolbarContent
-} from "react-native-paper";
 import ActivityCard from "./src/components/activity-card";
 import ActivityForm from "./src/components/activity-form";
+import ActivityMap from "./src/components/activity-map";
 
 type Props = {};
 const activities = [
@@ -24,36 +20,39 @@ const activities = [
     desc: 'This is some scary shit star wars dude, don\'t know him though...'
   }, {
 
-  },
-  {
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb8hLheVssxMAPVJFe62-fxm2DTZCrbZdOJ8C5TMD48AwlTVnd',
-    title: 'Star wars dude',
-    desc: 'This is some scary shit star wars dude, don\'t know him though...'
   }
 ];
+/*
+Structure of single activity:
+ - Name of activity
+ - Description
+ - Time
+ - Category
+ - Location (Google Maps)
+ */
+
+const formData = {
+
+};
 
 export default class App extends Component<Props> {
   render() {
-    return <View style={styles.container}>
-      <Toolbar>
-        <ToolbarContent
-          title="Networker"
-        />
-      </Toolbar>
+    let counter = 0;
+    return <ScrollView style={styles.container}>
       <ActivityForm />
+      <ActivityMap />
       <FlatList
         data={activities}
+        keyExtractor={(item) => counter++}
         renderItem={({item}) => <ActivityCard {...item}/>}
       />
-    </View>;
+    </ScrollView>;
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
   }
 });
