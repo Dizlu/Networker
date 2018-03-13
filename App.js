@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import ActivityCard from "./src/components/activity-card";
 import ActivityForm from "./src/components/activity-form";
-import ActivityMap from "./src/components/activity-map";
 
 type Props = {};
 const activities = [
@@ -22,28 +21,14 @@ const activities = [
 
   }
 ];
-/*
-Structure of single activity:
- - Name of activity
- - Description
- - Time
- - Category
- - Location (Google Maps)
- */
-
-const formData = {
-
-};
 
 export default class App extends Component<Props> {
   render() {
     let counter = 0;
     return <ScrollView style={styles.container}>
       <ActivityForm />
-      <ActivityMap />
       <FlatList
         data={activities}
-        keyExtractor={(item) => counter++}
         renderItem={({item}) => <ActivityCard {...item}/>}
       />
     </ScrollView>;
@@ -54,5 +39,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5FCFF',
+    paddingTop: 30
   }
 });

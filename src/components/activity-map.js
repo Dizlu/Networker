@@ -20,7 +20,7 @@ class ActivityMap extends Component {
             })}
             value={this.state.text}
             autoCorrect={false}
-          />
+          />=
         <Text style={{marginTop: 30}}>{this.state.text}</Text>
       </View>
     );
