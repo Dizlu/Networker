@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Picker, StyleSheet, Text, TextInput, View} from 'react-native';
+import {Button, Picker, StyleSheet, Text, TextInput, View} from 'react-native';
 
 class ActivityCard extends Component {
   state = {
@@ -17,7 +17,7 @@ class ActivityCard extends Component {
    - Location (Google Maps)
    */
 
-  render () {
+  render = () => {
     return (
       <View style={styles.container}>
         <View style={{marginBottom: 10}}>
@@ -64,8 +64,8 @@ class ActivityCard extends Component {
 
           <Text style={styles.label}>Category</Text>
           <Text>{this.state.category}</Text>
-
         </View>
+        <Button title={'Add activity'} onPress={() => this.props.addActivity(this.state)}/>
       </View>
     );
   }
