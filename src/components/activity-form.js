@@ -54,7 +54,9 @@ class ActivityForm extends Component {
             {this.state.pickerVisible && <Picker
               style={{borderColor: 'black', borderWidth: 1, backgroundColor: 'red'}}
               selectedValue={this.state.category}
-              onValueChange={(itemValue, itemIndex) => this.setState( state => ({...state, category: itemValue, pickerVisible: false}))}
+              onValueChange={(itemValue, itemIndex) => this.setState(
+                state => ({...state, category: itemValue, pickerVisible: false})
+              )}
             >
               <Picker.Item label={'Sports'} value={12} />
               <Picker.Item label={'Music'} value={13} />
