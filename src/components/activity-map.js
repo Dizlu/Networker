@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, TextInput, View} from 'react-native';
+import MapView from 'react-native-maps';
 
 class ActivityMap extends Component {
 
@@ -9,20 +10,21 @@ class ActivityMap extends Component {
 
   render() {
     return (
-      <View style={{flex: 1, margin: 10}}>
-        <Text>Enter some text below!</Text>
-        <TextInput
-            style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-            onChangeText={(text) => this.setState(state => {
-              return {
-                text: text
-              };
-            })}
-            value={this.state.text}
-            autoCorrect={false}
-          />=
-        <Text style={{marginTop: 30}}>{this.state.text}</Text>
-      </View>
+      // <View style={{flex: 1, margin: 10}}>
+      //   <Text>Enter some text below!</Text>
+      //   <TextInput
+      //       style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+      //       onChangeText={(text) => this.setState(state => {
+      //         return {
+      //           text: text
+      //         };
+      //       })}
+      //       value={this.state.text}
+      //       autoCorrect={false}
+      //     />=
+      //   <Text style={{marginTop: 30}}>{this.state.text}</Text>
+      // </View>
+      <MapView />
     );
   }
 }

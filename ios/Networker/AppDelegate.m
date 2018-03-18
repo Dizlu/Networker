@@ -12,13 +12,14 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 
+@import GoogleMaps;
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  [GMSServices provideAPIKey:@"AIzaSyD2mBiPTiWZqUOZ1D4uJL1o1rzrRdjZ_Xs"];
   NSURL *jsCodeLocation;
-  [GMSServices provideAPIKey:@"AIzaSyBW59pwYMkIt5MH2u-zkiTKDJz3HxyUHZ0"];
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 

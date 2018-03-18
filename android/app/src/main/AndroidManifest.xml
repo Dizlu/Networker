@@ -22,8 +22,8 @@
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
       <meta-data
-        android:name="com.google.android.geo.AIzaSyAAnzzhxso3qW7-qAB1j7FEC0McFyukBNs"
-        android:value="AIzaSyAAnzzhxso3qW7-qAB1j7FEC0McFyukBNs"/>
+        android:name="com.google.android.geo.AIzaSyC1uFv2APkyP6MT3a9txCYec6oQG7vPIug"
+        android:value="AIzaSyC1uFv2APkyP6MT3a9txCYec6oQG7vPIug"/>
     </application>
 
 </manifest>
