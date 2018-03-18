@@ -13,14 +13,28 @@ import { StackNavigator } from 'react-navigation';
 import ActivityCard from "./src/components/activity-card";
 import ActivityForm from "./src/components/activity-form";
 
-type Props = {};
+type Props = {
+  navigation: Object
+};
 
-class App extends Component<Props> {
+type activity = {
+  img: string,
+  name: string,
+  description: string,
+  uuid: string
+}
+
+type State = {
+  formVisible: boolean,
+  activities: Array<activity>
+}
+
+class App extends Component<Props, State> {
   static navigationOptions = {
     title: 'Networker'
   };
 
-  state = {
+  state: State = {
     formVisible: false,
     activities: [
       {
