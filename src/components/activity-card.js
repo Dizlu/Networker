@@ -1,20 +1,23 @@
 import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import uuid from "uuid";
+import { ImageBackground, Tile, Title, Subtitle, Heading, Button, Icon, Text, Overlay, Caption } from '@shoutem/ui'
+
 
 const ActivityCard = ({ img, name, description, uuid}) => (
-  <View style={styles.card}>
-      <Text style={{fontSize: 20}}>{name || 'There is no title'}</Text>
-      <Text>{description || 'There is no content'}</Text>
-    {/*<Image
-      source={{uri: img || 'https://wallpapershome.com/images/pages/pic_v/6505.jpg'}}
-    />*/}
-  </View>
+  <ImageBackground
+    styleName="featured"
+    source={{ uri: 'https://shoutem.github.io/img/ui-toolkit/examples/image-4.png' }}
+  >
+    <Tile>
+      <Title styleName="md-gutter-top">{name}</Title>
+      <Caption> {description} </Caption>
+    </Tile>
+  </ImageBackground>
 );
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1
   }
 });
 
