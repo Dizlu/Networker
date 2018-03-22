@@ -3,19 +3,17 @@
  */
 
 import React, { Component } from 'react';
-import {
-  Button,
-  FlatList,
-  ScrollView,
-  StyleSheet, Text, View
-} from 'react-native';
+import { FlatList, View, ScrollView, Dimensions, StyleSheet } from 'react-native';
+import { Examples, Icon, Text, Button } from '@shoutem/ui';
+import { StyleProvider } from '@shoutem/theme';
 import { StackNavigator } from 'react-navigation';
 import ActivityCard from "./src/components/activity-card";
-import ActivityForm from "./src/components/activity-form";
+import Profile from './src/components/profile';
+import EventForm from './src/components/event-form';
 
 type Props = {
   navigation: Object
-};
+}
 
 type activity = {
   img: string,
@@ -30,8 +28,16 @@ type State = {
 }
 
 class App extends Component<Props, State> {
-  static navigationOptions = {
-    title: 'Networker'
+  static navigationOptions = ({navigation}) => {
+    return {
+      title: 'Networker',
+      headerRight: (
+      <Button
+        style={{}}
+        onPress={() => navigation.navigate('Profile')}
+        title={'Profile'}
+      />
+    )}
   };
 
   state: State = {
@@ -47,41 +53,20 @@ class App extends Component<Props, State> {
   };
 
   render() {
-    return <ScrollView style={styles.container}>
-      <Button
-        style={{margin: 5}}
-        onPress={() => this.props.navigation.navigate('Profile')}
-        title={'Go to Profile'}
-      />
-      {!this.state.formVisible && <Button
-        onPress={() => this.setState(state => ({...state, formVisible: !this.state.formVisible}))}
-        title={'Add new activity'}
-      />}
-      {this.state.formVisible && <ActivityForm addActivity={form => { this.setState(state => ({ ...state, activities: [...state.activities, form], formVisible: false })); }}/>}
+    return <View style={styles.container}>
+      {!this.state.formVisible &&
+        <Button styleName="textual" onPress={() => {
+            this.props.navigation.navigate('Profile', {...this.state})
+          }}>
+          <Text>Add new event!</Text>
+        </Button>
+      }
       <FlatList
         data={this.state.activities}
         keyExtractor={(item, index) => item.uuid}
         renderItem={({item}) => <ActivityCard {...item} />}
       />
-    </ScrollView>;
-  }
-}
-
-class Profile extends Component<Props> {
-  static navigationOptions = {
-    title: 'Profile'
-  };
-
-  render () {
-    return (
-      <View>
-        <Button
-          onPress={() => this.props.navigation.navigate('Home')}
-          title={'Go Home'}
-        />
-        <Text> Ima profile! </Text>
-      </View>
-    );
+    </View>;
   }
 }
 

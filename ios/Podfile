@@ -24,6 +24,8 @@ target 'Networker' do
 
   pod 'GoogleMaps'  # Remove this line if you don't want to support Google Maps on iOS
   pod 'react-native-google-maps', path: rn_maps_path  # Remove this line if you don't want to support Google Maps on iOS
+  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+
 end
 
 post_install do |installer|
