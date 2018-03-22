@@ -1,22 +1,29 @@
 // @flow
-import React, {Component} from 'React';
-import ActivityForm from './activity-form';
+import React, { Component } from "React";
+import ActivityForm from "./activity-form";
 
 type EventFormProps = {
-  items: Object,
-  navigation: Object
-}
+  navigation: Object,
+  addItem: Function
+};
 
-export default class EventForm extends Component<EventFormProps> {
+type State = {
+  activities: Array<{}>
+};
+
+export default class EventForm extends Component<EventFormProps, State> {
   static navigationOptions = {
-    title: 'New event'
-  }
+    title: "New event"
+  };
 
-  render () {
+  render() {
     return (
-      <ActivityForm addActivity={(item) => {
-          this.props.navigation.navigate('App', {...this.props.navigation.state, item });
-        }}/>
-    )
+      <ActivityForm
+        addActivity={item => {
+          this.props.navigation.state.params.addItem(item);
+          this.props.navigation.goBack();
+        }}
+      />
+    );
   }
 }
