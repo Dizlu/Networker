@@ -10,12 +10,21 @@ import {
   Dimensions,
   StyleSheet
 } from "react-native";
-import { Examples, Icon, Text, Button, Title } from "@shoutem/ui";
+import {
+  Screen,
+  ListView,
+  Examples,
+  Icon,
+  Text,
+  Button,
+  Title
+} from "@shoutem/ui";
 import { StyleProvider } from "@shoutem/theme";
 import { StackNavigator } from "react-navigation";
 import ActivityCard from "./src/components/activity-card";
 import Profile from "./src/components/profile";
 import EventForm from "./src/components/event-form";
+import EventDetail from "./src/components/event-detail/main";
 
 type Props = {
   navigation: Object
@@ -37,9 +46,12 @@ class App extends Component<Props, State> {
     return {
       headerTitle: <Title>Networker</Title>,
       headerRight: (
-        <Button styleName="textual"
+        <Button
+          styleName="textual"
           onPress={() => navigation.navigate("Profile")}
-        ><Text>Profile</Text></Button>
+        >
+          <Text>Profile</Text>
+        </Button>
       )
     };
   };
@@ -57,9 +69,16 @@ class App extends Component<Props, State> {
     ]
   };
 
+  goToDetail = event => {
+    console.log("navigating...");
+    this.props.navigation.navigate("EventDetail", event);
+  };
+
+  renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
+
   render() {
     return (
-      <View style={styles.container}>
+      <Screen>
         {!this.state.formVisible && (
           <Button
             styleName="textual"
@@ -76,12 +95,8 @@ class App extends Component<Props, State> {
             <Text>Add new event!</Text>
           </Button>
         )}
-        <FlatList
-          data={this.state.activities}
-          keyExtractor={(item, index) => item.uuid}
-          renderItem={({ item }) => <ActivityCard {...item} />}
-        />
-      </View>
+        <ListView data={this.state.activities} renderRow={this.renderRow} />
+      </Screen>
     );
   }
 }
@@ -103,6 +118,9 @@ export default StackNavigator(
     },
     EventForm: {
       screen: EventForm
+    },
+    EventDetail: {
+      screen: EventDetail
     }
   },
   {
