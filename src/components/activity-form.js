@@ -1,14 +1,39 @@
-import React, {Component} from 'react';
-import {Button, Picker, StyleSheet, Text, TextInput, View} from 'react-native';
-import uuid from 'uuid';
+// @flow
+import React, { Component } from "react";
+import { StyleSheet, ScrollView } from "react-native";
+import uuid from "uuid";
+import {
+  Subtitle,
+  Button,
+  View,
+  Screen,
+  Heading,
+  Text,
+  TextInput,
+  Switch
+} from "@shoutem/ui";
+import CustomPicker from "./utils/picker";
+import ActivityCard from "./activity-card";
+type State = {
+  name: string,
+  text: string,
+  description: string,
+  category: number,
+  uuid: string,
+  previewVisible: boolean
+};
 
-class ActivityForm extends Component {
+type Props = {
+  addActivity: (state: Object<>) => void
+};
+
+class ActivityForm extends Component<Props, State> {
   state = {
-    name: 'Some cool texts',
-    description: 'some description placeholder',
+    name: "Some cool texts",
+    description: "some description placeholder",
     category: 1,
     uuid: uuid(),
-    pickerVisible: false
+    previewVisible: false
   };
 
   /*
@@ -20,66 +45,73 @@ class ActivityForm extends Component {
    - Location (Google Maps)
    */
 
+  pickerOptions = [
+    {
+      name: "Some name",
+      value: 1
+    },
+    {
+      name: "Some name2",
+      value: 2
+    },
+    {
+      name: "Some nam3",
+      value: 3
+    },
+    {
+      name: "Some name4",
+      value: 4
+    }
+  ];
+
   render() {
     return (
-      <View style={styles.container}>
-        <View>
-          {!this.state.pickerVisible && <View>
-            <Text style={styles.header}>Create new activity </Text>
-            <View style={{margin: 5}}>
-              <Text style={styles.label}>Name</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={(name) => this.setState(state => ({...state, name}))}
-                value={this.state.text}
-                autoCorrect={false}
+      <Screen>
+        <ScrollView>
+          <Subtitle style={{ marginHorizontal: 10 }} styleName={"h-center"}>
+            Name
+          </Subtitle>
+          <TextInput
+            placeholder={"Name of event"}
+            onChangeText={name => this.setState(state => ({ ...state, name }))}
+          />
+          <Subtitle styleName={"h-center"}>Description</Subtitle>
+          <TextInput
+            multiline={true}
+            placeholder={"Description of event"}
+            onChangeText={description =>
+              this.setState(state => ({ ...state, description }))
+            }
+            autoCorrect={false}
+          />
+          <CustomPicker
+            options={this.pickerOptions}
+            onValueChange={(itemValue, itemIndex) =>
+              this.setState(state => ({
+                ...state,
+                category: itemValue
+              }))
+            }
+          />
+          <Button
+            style={{ margin: 10 }}
+            onPress={() => {
+              this.props.addActivity(this.state);
+              this.setState(state => ({ ...state, uuid: uuid() }));
+            }}
+          >
+            <Text>Add event</Text>
+          </Button>
+          <View styleName="content md-gutter-top md-gutter-left">
+            <Subtitle>Show preview</Subtitle>
+            <Switch
+              value={this.state.previewVisible}
+              onValueChange={value => this.setState((state) => ({...state, previewVisible: value}))}
               />
-            </View>
-            <View style={{margin: 5}}>
-              <Text style={styles.label}>Description</Text>
-              <TextInput
-                style={styles.input}
-                multiline={true}
-                onChangeText={(description) => this.setState(state => ({...state, description}))}
-                value={this.state.text}
-                autoCorrect={false}
-              />
-            </View>
-          </View>}
-          <View>
-            { !this.state.pickerVisible && <Button
-              title={'Choose category'}
-              onPress={() => this.setState(state => ({...state, pickerVisible: true}))}
-            /> }
-            {this.state.pickerVisible && <Picker
-              style={{borderColor: 'black', borderWidth: 1, backgroundColor: 'red'}}
-              selectedValue={this.state.category}
-              onValueChange={(itemValue, itemIndex) => this.setState(
-                state => ({...state, category: itemValue, pickerVisible: false})
-              )}
-            >
-              <Picker.Item label={'Sports'} value={12} />
-              <Picker.Item label={'Music'} value={13} />
-              <Picker.Item label={'Bowling'} value={14} />
-              <Picker.Item label={'Professional alcoholism'} value={15} />
-              <Picker.Item label={'Biking'} value={16} />
-              <Picker.Item label={'Night racing'} value={17} />
-            </Picker>}
-          <View style={{borderWidth: 2, borderColor: 'black', padding: 20}}>
-            <Text style={styles.header}> Preview of activity </Text>
-            <Text style={styles.label}>Name</Text>
-            <Text>{this.state.name}</Text>
-
-            <Text style={styles.label}>Description</Text>
-            <Text>{this.state.description}</Text>
-
-            <Text style={styles.label}>Category</Text>
-            <Text>{this.state.category}</Text>
           </View>
-        </View>
-        <Button style={{marginTop: 5}} title={'Add activity'} onPress={() => { this.props.addActivity(this.state); this.setState(state => ({...state, uuid: uuid()})) }}/>
-        </View>
-      </View>
+          {this.state.previewVisible && <ActivityCard {...this.state} />}
+        </ScrollView>
+      </Screen>
     );
   }
 }
@@ -94,11 +126,11 @@ const styles = StyleSheet.create({
     margin: 5
   },
   label: {
-    color: '#575757',
+    color: "#575757",
     fontSize: 11
   },
   header: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 25
   }
 });
