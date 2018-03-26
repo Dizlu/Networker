@@ -20,7 +20,8 @@ type State = {
   description: string,
   category: number,
   uuid: string,
-  previewVisible: boolean
+  previewVisible: boolean,
+  selectVisible: boolean,
 };
 
 type Props = {
@@ -33,7 +34,8 @@ class ActivityForm extends Component<Props, State> {
     description: "some description placeholder",
     category: 1,
     uuid: uuid(),
-    previewVisible: false
+    previewVisible: false,
+    selectVisible: true,
   };
 
   /*
@@ -84,7 +86,14 @@ class ActivityForm extends Component<Props, State> {
             }
             autoCorrect={false}
           />
-          <CustomPicker
+          <View styleName="content md-gutter-top md-gutter-left">
+            <Subtitle>Show categories</Subtitle>
+            <Switch
+              value={this.state.selectVisible}
+              onValueChange={value => this.setState((state) => ({...state, selectVisible: value}))}
+              />
+          </View>
+          {this.state.selectVisible && <CustomPicker
             options={this.pickerOptions}
             onValueChange={(itemValue, itemIndex) =>
               this.setState(state => ({
@@ -92,7 +101,7 @@ class ActivityForm extends Component<Props, State> {
                 category: itemValue
               }))
             }
-          />
+          />}
           <Button
             style={{ margin: 10 }}
             onPress={() => {
