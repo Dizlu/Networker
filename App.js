@@ -26,6 +26,8 @@ import Profile from "./src/components/profile";
 import EventForm from "./src/components/event-form";
 import EventDetail from "./src/components/event-detail/main";
 import XMLFetch from "./services/XMLFetch";
+import * as fastXmlParser from "fast-xml-parser";
+import XMLParse from "./services/XMLParse";
 
 type Props = {
   navigation: Object
@@ -57,6 +59,19 @@ class App extends Component<Props, State> {
     };
   };
 
+  componentDidMount() {
+    XMLParse('https://lublin.eu/rss/pl/66/2.xml')
+      .then(parsedData => {
+
+        this.setState( state => ({
+          activities: [
+            ...state.activities,
+            ...parsedData.rss.channel.item
+          ]
+        }));
+      });
+  }
+
   state = {
     activities: [
       {
@@ -77,8 +92,7 @@ class App extends Component<Props, State> {
   renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
 
   render() {
-    XMLFetch('https://lublin.eu/rss/pl/66/2.xml')
-      .then(data => console.log(data));
+
     return (
       <Screen>
         {!this.state.formVisible && (
