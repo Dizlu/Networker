@@ -25,6 +25,7 @@ import ActivityCard from "./src/components/activity-card";
 import Profile from "./src/components/profile";
 import EventForm from "./src/components/event-form";
 import EventDetail from "./src/components/event-detail/main";
+import XMLFetch from "./services/XMLFetch";
 
 type Props = {
   navigation: Object
@@ -70,13 +71,14 @@ class App extends Component<Props, State> {
   };
 
   goToDetail = event => {
-    console.log("navigating...");
     this.props.navigation.navigate("EventDetail", event);
   };
 
   renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
 
   render() {
+    XMLFetch('https://lublin.eu/rss/pl/66/2.xml')
+      .then(data => console.log(data));
     return (
       <Screen>
         {!this.state.formVisible && (
