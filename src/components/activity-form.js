@@ -16,7 +16,6 @@ import CustomPicker from "./utils/picker";
 import ActivityCard from "./activity-card";
 type State = {
   name: string,
-  text: string,
   description: string,
   category: number,
   uuid: string,
@@ -27,6 +26,7 @@ type State = {
 type Props = {
   addActivity: (state: Object<>) => void
 };
+
 
 class ActivityForm extends Component<Props, State> {
   state = {
@@ -102,6 +102,14 @@ class ActivityForm extends Component<Props, State> {
               }))
             }
           />}
+          <View styleName="content md-gutter-top md-gutter-left">
+            <Subtitle>Show preview</Subtitle>
+            <Switch
+              value={this.state.previewVisible}
+              onValueChange={value => this.setState((state) => ({...state, previewVisible: value}))}
+            />
+          </View>
+          {this.state.previewVisible && <ActivityCard {...this.state} />}
           <Button
             style={{ margin: 10 }}
             onPress={() => {
@@ -111,14 +119,6 @@ class ActivityForm extends Component<Props, State> {
           >
             <Text>Add event</Text>
           </Button>
-          <View styleName="content md-gutter-top md-gutter-left">
-            <Subtitle>Show preview</Subtitle>
-            <Switch
-              value={this.state.previewVisible}
-              onValueChange={value => this.setState((state) => ({...state, previewVisible: value}))}
-              />
-          </View>
-          {this.state.previewVisible && <ActivityCard {...this.state} />}
         </ScrollView>
       </Screen>
     );

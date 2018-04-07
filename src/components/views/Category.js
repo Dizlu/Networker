@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {StyleSheet} from "react-native";
 import {
   Screen,
   ListView,
@@ -25,6 +24,14 @@ type State = {
   activities: Array<activity>
 };
 
+type xmlItem = {
+  rss: {
+    channel: {
+      item: Object
+    }
+  }
+}
+
 class Category extends Component<Props, State> {
   static navigationOptions = ({navigation}) => {
     return {
@@ -41,8 +48,10 @@ class Category extends Component<Props, State> {
   };
 
   componentDidMount() {
-    XMLParse('https://lublin.eu/rss/pl/66/2.xml')
-      .then(parsedData => {
+    const rssLink = this.props.link || 'https://lublin.eu/rss/pl/66/2.xml';
+
+    XMLParse(rssLink)
+      .then( (parsedData: xmlItem) => {
 
         this.setState(state => ({
           activities: [
@@ -67,22 +76,20 @@ class Category extends Component<Props, State> {
 
     return (
       <Screen>
-        {!this.state.formVisible && (
-          <Button
-            styleName="textual"
-            onPress={() => {
-              this.props.navigation.navigate("EventForm", {
-                addItem: item =>
-                  this.setState(state => ({
-                    ...state,
-                    activities: [...state.activities, item]
-                  }))
-              });
-            }}
-          >
-            <Text>Add new event!</Text>
-          </Button>
-        )}
+        <Button
+          styleName="textual"
+          onPress={() => {
+            this.props.navigation.navigate("EventForm", {
+              addItem: item =>
+                this.setState(state => ({
+                  ...state,
+                  activities: [...state.activities, item]
+                }))
+            });
+          }}
+        >
+          <Text>Add new event!</Text>
+        </Button>
         <ListView data={this.state.activities} renderRow={this.renderRow}/>
       </Screen>
     );

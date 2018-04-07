@@ -1,30 +1,35 @@
+// @flow
 import React from 'react';
-import {StyleSheet, TouchableHighlight} from 'react-native';
-import uuid from "uuid";
-import { Image, Tile, Title, Caption, View } from '@shoutem/ui'
+import {TouchableHighlight} from 'react-native';
+import {Tile, Title, Caption, View } from '@shoutem/ui'
 
+type Props = {
+  img?: string,
+  name: string,
+  description: string,
+  uuid: string,
+  goToDetail?: (props: Props) => void
+}
 
-const ActivityCard = ({ img, name, description, uuid, goToDetail}) => (
-  <TouchableHighlight onPress={() => goToDetail({img, name, description, uuid})}>
-    <Tile>
-      <Image
-        styleName="large-banner"
-        source={{ uri: 'https://shoutem.github.io/img/ui-toolkit/examples/image-4.png' }}
-      />
-      <View styleName="content">
-        <Title styleName="md-gutter-top">{name}</Title>
-        <View styleName="horizontal space-between">
-          <Caption> {description.length > 40 ? description.slice(0, 40).trim() + '...' : description} </Caption>
-          <Caption> 15:34 </Caption>
+const ActivityCard = (props: Props) => {
+  const { img, name, description, uuid, goToDetail } = props;
+
+  return (<TouchableHighlight onPress={() => goToDetail && goToDetail({img, name, description, uuid})}>
+      <Tile>
+        <View styleName="content">
+          <Title styleName="md-gutter-top">{name}</Title>
+          <View styleName="horizontal space-between">
+            <Caption> {description.length > 100 ? description.slice(0, 100).trim() + '...' : description} </Caption>
+          </View>
+          <View styleName="horizontal space-between">
+            <Caption> Kategoria </Caption>
+            <Caption> 15:34 </Caption>
+          </View>
         </View>
-      </View>
-    </Tile>
-  </TouchableHighlight>
-);
+      </Tile>
+    </TouchableHighlight>
+  );
+}
 
-const styles = StyleSheet.create({
-  card: {
-  }
-});
 
 export default ActivityCard;
