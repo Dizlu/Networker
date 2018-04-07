@@ -8,13 +8,14 @@ type Props = {
   name: string,
   description: string,
   uuid: string,
+  pubDate: string,
   goToDetail?: (props: Props) => void
 }
 
 const ActivityCard = (props: Props) => {
-  const { img, name, description, uuid, goToDetail } = props;
+  const { name, description, goToDetail } = props;
 
-  return (<TouchableHighlight onPress={() => goToDetail && goToDetail({img, name, description, uuid})}>
+  return (<TouchableHighlight onPress={() => goToDetail && goToDetail(props)}>
       <Tile>
         <View styleName="content">
           <Title styleName="md-gutter-top">{name}</Title>
@@ -23,13 +24,13 @@ const ActivityCard = (props: Props) => {
           </View>
           <View styleName="horizontal space-between">
             <Caption> Kategoria </Caption>
-            <Caption> 15:34 </Caption>
+            <Caption> {new Date(props.pubDate).toLocaleDateString()} - {new Date(props.pubDate).toLocaleTimeString()} </Caption>
           </View>
         </View>
       </Tile>
     </TouchableHighlight>
   );
-}
+};
 
 
 export default ActivityCard;
