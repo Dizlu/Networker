@@ -20,10 +20,11 @@ target 'Networker' do
     'RCTWebSocket',
   ]
 
+  # react-native-maps dependencies
   pod 'react-native-maps', path: rn_maps_path
-
-  pod 'GoogleMaps'  # Remove this line if you don't want to support Google Maps on iOS
-  pod 'react-native-google-maps', path: rn_maps_path  # Remove this line if you don't want to support Google Maps on iOS
+  pod 'react-native-google-maps', path: rn_maps_path  # Remove this line if you don't want to support GoogleMaps on iOS
+  pod 'GoogleMaps'  # Remove this line if you don't want to support GoogleMaps on iOS
+  pod 'Google-Maps-iOS-Utils' # Remove this line if you don't want to support GoogleMaps on iOS
   pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
 
 end

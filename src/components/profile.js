@@ -7,7 +7,7 @@ type Props = {
 
 export default class Profile extends Component<Props> {
   static navigationOptions = {
-    title: 'Profile'
+    title: 'My profile'
   };
 
   render () {

@@ -1,6 +1,7 @@
 import React, {Component} from 'React';
-import { Text, Title, Button, View, Tile, Caption, Icon, ImageBackground } from '@shoutem/ui';
+import { Screen, Text, Title, Button, View, Tile, Caption, Icon, ImageBackground } from '@shoutem/ui';
 import {ActivityIndicator} from "react-native";
+import MapView from 'react-native-maps';
 
 type State = {
   imageLoaded: boolean
@@ -39,8 +40,7 @@ export default class EventDetail extends Component<State, Props> {
 
   render() {
     const state = this.props.navigation.state.params;
-    console.log(state);
-    return <View>
+    return <Screen>
       <ImageBackground
         onLoad={() => this.setState( state => ({...state, imageLoaded: true}))}
         styleName="large-banner"
@@ -61,6 +61,17 @@ export default class EventDetail extends Component<State, Props> {
       <Tile>
         <Text style={{margin: 15}}>{state.description}</Text>
       </Tile>
-    </View>
+      <Text>Map: </Text>
+      <MapView
+        style={{flex: 1, height: 300}}
+        initialRegion={{
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+      />
+
+    </Screen>
   }
 }
