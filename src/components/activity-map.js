@@ -1,40 +1,38 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, TextInput, View} from 'react-native';
 import MapView from 'react-native-maps';
+import {Text, Screen, Title, Button} from '@shoutem/ui';
 
 class ActivityMap extends Component {
-
-  state = {
-    text: 'Example'
+  static navigationOptions = ({navigation}) => {
+    return {
+      headerTitle: <Title>Networker</Title>,
+      headerRight: (
+        <Button
+          styleName="textual"
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <Text>Profile</Text>
+        </Button>
+      )
+    };
   };
 
   render() {
     return (
-      // <View style={{flex: 1, margin: 10}}>
-      //   <Text>Enter some text below!</Text>
-      //   <TextInput
-      //       style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-      //       onChangeText={(text) => this.setState(state => {
-      //         return {
-      //           text: text
-      //         };
-      //       })}
-      //       value={this.state.text}
-      //       autoCorrect={false}
-      //     />=
-      //   <Text style={{marginTop: 30}}>{this.state.text}</Text>
-      // </View>
-      <MapView />
+      <Screen styleName={'vertical collapsed'}>
+        <Text styleName={'h-center'}>Map: </Text>
+        <MapView
+          style={{flex: 1}}
+          initialRegion={{
+            latitude: 51.2465,
+            longitude: 22.5684,
+            latitudeDelta: 0.0422,
+            longitudeDelta: 0.0221,
+          }}
+        />
+      </Screen>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  main: {
-    width: '90%',
-    margin: 10,
-    height: 600,
-  }
-});
 
 export default ActivityMap;

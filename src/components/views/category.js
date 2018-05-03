@@ -8,7 +8,6 @@ import {
 } from "@shoutem/ui";
 import XMLParse from "../../../services/XMLParse";
 import ActivityCard from "../activity-card";
-import MapView from "react-native-maps";
 
 type Props = {
   navigation: Object

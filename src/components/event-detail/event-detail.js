@@ -1,7 +1,7 @@
 import React, {Component} from 'React';
 import { Screen, Text, Title, Button, View, Tile, Caption, Icon, ImageBackground } from '@shoutem/ui';
 import {ActivityIndicator} from "react-native";
-import MapView from 'react-native-maps';
+import ActivityMap from "../activity-map";
 
 type State = {
   imageLoaded: boolean
@@ -40,6 +40,7 @@ export default class EventDetail extends Component<State, Props> {
 
   render() {
     const state = this.props.navigation.state.params;
+    const navigation = this.props.navigation;
     return <Screen>
       <ImageBackground
         onLoad={() => this.setState( state => ({...state, imageLoaded: true}))}
@@ -60,18 +61,10 @@ export default class EventDetail extends Component<State, Props> {
       </ImageBackground>
       <Tile>
         <Text style={{margin: 15}}>{state.description}</Text>
+        <Button styleName="dark" onPress={() => navigation.navigate('ActivityMap')}>
+          <Text>See on map</Text>
+        </Button>
       </Tile>
-      <Text>Map: </Text>
-      <MapView
-        style={{flex: 1, height: 300}}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      />
-
     </Screen>
   }
 }
