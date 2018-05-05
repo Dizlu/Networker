@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import MapView from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import {Text, Screen, Title, Button} from '@shoutem/ui';
 
 class ActivityMap extends Component {
@@ -18,18 +18,24 @@ class ActivityMap extends Component {
   };
 
   render() {
+    const state = this.props.navigation.state.params;
     return (
       <Screen styleName={'vertical collapsed'}>
-        <Text styleName={'h-center'}>Map: </Text>
         <MapView
           style={{flex: 1}}
-          initialRegion={{
-            latitude: 51.2465,
-            longitude: 22.5684,
-            latitudeDelta: 0.0422,
-            longitudeDelta: 0.0221,
-          }}
-        />
+          initialRegion={state.coordinates}
+        >
+          {state.markers.map((marker) => (
+            <Marker
+              key={marker.title + '-marker-key'}
+              draggable
+              coordinate={marker.coordinate}
+              title={marker.title}
+              description={marker.description}
+            />
+          ))}
+
+        </MapView>
       </Screen>
     );
   }
