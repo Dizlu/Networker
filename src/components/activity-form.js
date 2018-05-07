@@ -1,6 +1,6 @@
 // @flow
-import React, { Component } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import React, {Component} from "react";
+import {StyleSheet, ScrollView} from "react-native";
 import uuid from "uuid";
 import {
   Subtitle,
@@ -14,6 +14,7 @@ import {
 } from "@shoutem/ui";
 import CustomPicker from "./utils/picker";
 import ActivityCard from "./activity-card";
+
 type State = {
   name: string,
   description: string,
@@ -21,6 +22,7 @@ type State = {
   uuid: string,
   previewVisible: boolean,
   selectVisible: boolean,
+  pubDate: Date
 };
 
 type Props = {
@@ -36,6 +38,7 @@ class ActivityForm extends Component<Props, State> {
     uuid: uuid(),
     previewVisible: false,
     selectVisible: true,
+    pubDate: new Date()
   };
 
   /*
@@ -70,19 +73,19 @@ class ActivityForm extends Component<Props, State> {
     return (
       <Screen>
         <ScrollView>
-          <Subtitle style={{ marginHorizontal: 10 }} styleName={"h-center"}>
+          <Subtitle style={{marginHorizontal: 10}} styleName={"h-center"}>
             Name
           </Subtitle>
           <TextInput
             placeholder={"Name of event"}
-            onChangeText={name => this.setState(state => ({ ...state, name }))}
+            onChangeText={name => this.setState(state => ({...state, name}))}
           />
           <Subtitle styleName={"h-center"}>Description</Subtitle>
           <TextInput
             multiline={true}
             placeholder={"Description of event"}
             onChangeText={description =>
-              this.setState(state => ({ ...state, description }))
+              this.setState(state => ({...state, description}))
             }
             autoCorrect={false}
           />
@@ -91,15 +94,17 @@ class ActivityForm extends Component<Props, State> {
             <Switch
               value={this.state.selectVisible}
               onValueChange={value => this.setState((state) => ({...state, selectVisible: value}))}
-              />
+            />
           </View>
           {this.state.selectVisible && <CustomPicker
             options={this.pickerOptions}
-            onValueChange={(itemValue, itemIndex) =>
+            onValueChange={(itemValue, itemIndex) => {
+              console.log('aaaaa');
               this.setState(state => ({
                 ...state,
-                category: itemValue
-              }))
+                category: this.pickerOptions.find( option => itemValue === option.value).name
+              }));
+            }
             }
           />}
           <View styleName="content md-gutter-top md-gutter-left">
@@ -111,10 +116,10 @@ class ActivityForm extends Component<Props, State> {
           </View>
           {this.state.previewVisible && <ActivityCard {...this.state} />}
           <Button
-            style={{ margin: 10 }}
+            style={{margin: 10}}
             onPress={() => {
               this.props.addActivity(this.state);
-              this.setState(state => ({ ...state, uuid: uuid() }));
+              this.setState(state => ({...state, uuid: uuid()}));
             }}
           >
             <Text>Add event</Text>

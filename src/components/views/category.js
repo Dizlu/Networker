@@ -48,7 +48,7 @@ class Category extends Component<Props, State> {
   };
 
   componentDidMount() {
-    const rssLink = this.props.link || 'https://lublin.eu/rss/pl/66/2.xml';
+    const rssLink = this.props.link;
 
     XMLParse(rssLink)
       .then( (parsedData: xmlItem) => {

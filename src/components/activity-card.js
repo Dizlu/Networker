@@ -6,9 +6,10 @@ import {Tile, Title, Caption, View } from '@shoutem/ui'
 type Props = {
   img?: string,
   name: string,
+  category: number,
   description: string,
   uuid: string,
-  pubDate: string,
+  pubDate: Date,
   goToDetail?: (props: Props) => void
 }
 
@@ -23,7 +24,7 @@ const ActivityCard = (props: Props) => {
             <Caption> {description.length > 100 ? description.slice(0, 100).trim() + '...' : description} </Caption>
           </View>
           <View styleName="horizontal space-between">
-            <Caption> Kategoria </Caption>
+            <Caption> {props.category || 'Wydarzenie'} </Caption>
             <Caption> {new Date(props.pubDate).toLocaleDateString()} - {new Date(props.pubDate).toLocaleTimeString()} </Caption>
           </View>
         </View>
