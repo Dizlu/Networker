@@ -1,6 +1,6 @@
 // @flow
-import React, {Component} from "react";
-import {StyleSheet, ScrollView} from "react-native";
+import React, { Component } from "react";
+import { StyleSheet, ScrollView } from "react-native";
 import uuid from "uuid";
 import {
   Subtitle,
@@ -28,7 +28,6 @@ type State = {
 type Props = {
   addActivity: (state: Object<>) => void
 };
-
 
 class ActivityForm extends Component<Props, State> {
   state = {
@@ -73,19 +72,19 @@ class ActivityForm extends Component<Props, State> {
     return (
       <Screen>
         <ScrollView>
-          <Subtitle style={{marginHorizontal: 10}} styleName={"h-center"}>
+          <Subtitle style={{ marginHorizontal: 10 }} styleName={"h-center"}>
             Name
           </Subtitle>
           <TextInput
             placeholder={"Name of event"}
-            onChangeText={name => this.setState(state => ({...state, name}))}
+            onChangeText={name => this.setState(state => ({ ...state, name }))}
           />
           <Subtitle styleName={"h-center"}>Description</Subtitle>
           <TextInput
             multiline={true}
             placeholder={"Description of event"}
             onChangeText={description =>
-              this.setState(state => ({...state, description}))
+              this.setState(state => ({ ...state, description }))
             }
             autoCorrect={false}
           />
@@ -93,33 +92,40 @@ class ActivityForm extends Component<Props, State> {
             <Subtitle>Show categories</Subtitle>
             <Switch
               value={this.state.selectVisible}
-              onValueChange={value => this.setState((state) => ({...state, selectVisible: value}))}
+              onValueChange={value =>
+                this.setState(state => ({ ...state, selectVisible: value }))
+              }
             />
           </View>
-          {this.state.selectVisible && <CustomPicker
-            options={this.pickerOptions}
-            onValueChange={(itemValue, itemIndex) => {
-              console.log('aaaaa');
-              this.setState(state => ({
-                ...state,
-                category: this.pickerOptions.find( option => itemValue === option.value).name
-              }));
-            }
-            }
-          />}
+          {this.state.selectVisible && (
+            <CustomPicker
+              options={this.pickerOptions}
+              onValueChange={(itemValue, itemIndex) => {
+                console.log("aaaaa");
+                this.setState(state => ({
+                  ...state,
+                  category: this.pickerOptions.find(
+                    option => itemValue === option.value
+                  ).name
+                }));
+              }}
+            />
+          )}
           <View styleName="content md-gutter-top md-gutter-left">
             <Subtitle>Show preview</Subtitle>
             <Switch
               value={this.state.previewVisible}
-              onValueChange={value => this.setState((state) => ({...state, previewVisible: value}))}
+              onValueChange={value =>
+                this.setState(state => ({ ...state, previewVisible: value }))
+              }
             />
           </View>
           {this.state.previewVisible && <ActivityCard {...this.state} />}
           <Button
-            style={{margin: 10}}
+            style={{ margin: 10 }}
             onPress={() => {
               this.props.addActivity(this.state);
-              this.setState(state => ({...state, uuid: uuid()}));
+              this.setState(state => ({ ...state, uuid: uuid() }));
             }}
           >
             <Text>Add event</Text>

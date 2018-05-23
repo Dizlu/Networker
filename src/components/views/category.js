@@ -1,11 +1,6 @@
-import React, {Component} from "react";
-import {
-  Screen,
-  ListView,
-  Text,
-  Button,
-  Title
-} from "@shoutem/ui";
+// @flow
+import React, { Component } from "react";
+import { Screen, ListView, Text, Button, Title, Caption } from "@shoutem/ui";
 import XMLParse from "../../../services/XMLParse";
 import ActivityCard from "../activity-card";
 
@@ -30,10 +25,10 @@ type xmlItem = {
       item: Object
     }
   }
-}
+};
 
 class Category extends Component<Props, State> {
-  static navigationOptions = ({navigation}) => {
+  static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: <Title>Networker</Title>,
       headerRight: (
@@ -50,16 +45,11 @@ class Category extends Component<Props, State> {
   componentDidMount() {
     const rssLink = this.props.link;
 
-    XMLParse(rssLink)
-      .then( (parsedData: xmlItem) => {
-
-        this.setState(state => ({
-          activities: [
-            ...state.activities,
-            ...parsedData.rss.channel.item
-          ]
-        }));
-      });
+    XMLParse(rssLink).then((parsedData: xmlItem) => {
+      this.setState(state => ({
+        activities: [...state.activities, ...parsedData.rss.channel.item]
+      }));
+    });
   }
 
   state = {
@@ -70,10 +60,9 @@ class Category extends Component<Props, State> {
     this.props.navigation.navigate("EventDetail", event);
   };
 
-  renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail}/>;
+  renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
 
   render() {
-
     return (
       <Screen>
         <Button
@@ -90,7 +79,7 @@ class Category extends Component<Props, State> {
         >
           <Text>Add new event!</Text>
         </Button>
-        <ListView data={this.state.activities} renderRow={this.renderRow}/>
+        <ListView data={this.state.activities} renderRow={this.renderRow} />
       </Screen>
     );
   }
