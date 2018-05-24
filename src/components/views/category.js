@@ -5,7 +5,8 @@ import XMLParse from "../../../services/XMLParse";
 import ActivityCard from "../activity-card";
 
 type Props = {
-  navigation: Object
+  navigation: Object,
+  link: string
 };
 
 type activity = {
