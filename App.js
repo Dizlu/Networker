@@ -31,6 +31,6 @@ export default StackNavigator(
     }
   },
   {
-    initialRouteName: "Login"
+    initialRouteName: "Home"
   }
 );

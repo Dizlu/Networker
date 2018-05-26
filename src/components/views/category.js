@@ -4,6 +4,15 @@ import { Screen, ListView, Text, Button, Title, Caption } from "@shoutem/ui";
 import XMLParse from "../../../services/XMLParse";
 import ActivityCard from "../activity-card";
 
+import firebase from "react-native-firebase";
+
+firebase
+  .firestore()
+  .collection("Events")
+  .doc("ZK7Q5ZedOgxnVFZjKPHf")
+  .get()
+  .then(doc => console.log(doc.data()));
+
 type Props = {
   navigation: Object,
   link: string
