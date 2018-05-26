@@ -36,11 +36,11 @@ export class LogIn extends Component {
   loginWithEmail(state) {
     firebase
       .auth()
-      .signInWithEmailAndPassword(state.login, state.password)
+      .signInAndRetrieveDataWithEmailAndPassword(state.login, state.password)
       .then(res => {
         this.setState(state => ({
           ...state,
-          uid: res.uid
+          uid: res.user.uid
         }));
       })
       .catch(err => console.log(err));
@@ -48,6 +48,7 @@ export class LogIn extends Component {
 
   render() {
     const isLogged = this.state.uid;
+    const navigation = this.props.navigation;
     if (!isLogged) {
       return (
         <View>
@@ -88,12 +89,18 @@ export class LogIn extends Component {
         </View>
       );
     } else if (this.state.uid) {
-      return (
-        <View>
-          <Title>Hello dear user!</Title>
-        </View>
-      );
+      return <Dummmy navigation={navigation} />;
     }
+  }
+}
+
+class Dummmy extends Component {
+  componentDidMount() {
+    this.props.navigation.navigate("Home");
+  }
+
+  render() {
+    return <View />;
   }
 }
 /* 
