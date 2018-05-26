@@ -64,7 +64,6 @@ class Category extends Component<Props, State> {
   renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
 
   render() {
-    console.log("worked!!!");
     return (
       <Screen>
         <Button

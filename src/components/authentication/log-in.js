@@ -1,15 +1,38 @@
 import React, { Component } from "react";
 import { View } from "react-native";
 import firebase from "react-native-firebase";
-import { Button, Caption, Title, Tile, TextInput, Text } from "@shoutem/ui";
+import {
+  Button,
+  Caption,
+  Title,
+  Tile,
+  TextInput,
+  Text,
+  Heading
+} from "@shoutem/ui";
 //import { connect } from "react-redux";
 
+class Redirector extends Component {
+  componentDidMount() {
+    this.props.navigation.navigate("Home", this.props.user);
+  }
+
+  render() {
+    return <View />;
+  }
+}
+
 export class LogIn extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: <Title>Networker</Title>
+    };
+  };
   unsubscriber = null;
   state = {
-    login: "",
+    email: "",
     password: "",
-    uid: null
+    user: null
   };
 
   componentDidMount() {
@@ -18,56 +41,51 @@ export class LogIn extends Component {
     });
   }
 
-  logInAnonymously() {
-    console.log("logging...");
-    firebase
-      .auth()
-      .signInAnonymouslyAndRetrieveData()
-      .then(credential => {
-        if (credential) {
-          console.log("default app user ->", credential.user.toJSON());
-        }
-      })
-      .catch(e => {
-        console.log(e);
-      });
-  }
-
   loginWithEmail(state) {
     firebase
       .auth()
-      .signInAndRetrieveDataWithEmailAndPassword(state.login, state.password)
+      .signInAndRetrieveDataWithEmailAndPassword(state.email, state.password)
       .then(res => {
         this.setState(state => ({
           ...state,
-          uid: res.user.uid
+          user: res.user
         }));
       })
       .catch(err => console.log(err));
   }
 
+  registerWithEmail(state) {
+    firebase
+      .auth()
+      .createUserAndRetrieveDataWithEmailAndPassword(
+        state.email,
+        state.password
+      )
+      .then(res => {
+        this.setState(state => ({
+          ...state,
+          user: res.user
+        }));
+      });
+  }
+
   render() {
-    const isLogged = this.state.uid;
+    const isLogged = this.state.user;
     const navigation = this.props.navigation;
     if (!isLogged) {
       return (
         <View>
-          <Button>
-            <Caption
-              style={{ margin: 15, padding: 15 }}
-              onPress={() => this.logInAnonymously()}
+          <Tile style={{ margin: 10, padding: 10 }}>
+            <Title
+              styleName="sm-gutter-bottom"
+              style={{ flexGrow: 1, margin: 25 }}
             >
-              Log in annonymously here!
-            </Caption>
-          </Button>
-          <Tile style={{ margin: 10 }}>
-            <Title styleName={"h-center"} style={{ margin: 25 }}>
-              Log in here
+              Log in
             </Title>
             <TextInput
               placeholder={"Username or email"}
               onChangeText={text =>
-                this.setState(state => ({ ...state, login: text }))
+                this.setState(state => ({ ...state, email: text }))
               }
               autoCorrect={false}
             />
@@ -79,28 +97,25 @@ export class LogIn extends Component {
               autoCorrect={false}
               secureTextEntry
             />
-            <Button
-              styleName={"dark"}
-              onPress={() => this.loginWithEmail(this.state)}
-            >
-              <Text>Log in!</Text>
-            </Button>
           </Tile>
+          <Button
+            styleName="secondary"
+            style={{ margin: 5, marginLeft: 15 }}
+            onPress={() => this.loginWithEmail(this.state)}
+          >
+            <Text>Log in!</Text>
+          </Button>
+          <Button
+            style={{ margin: 5, marginLeft: 15 }}
+            onPress={() => this.registerWithEmail(this.state)}
+          >
+            <Text>Register</Text>
+          </Button>
         </View>
       );
-    } else if (this.state.uid) {
-      return <Dummmy navigation={navigation} />;
+    } else if (this.state.user) {
+      return <Redirector navigation={navigation} user={this.state.user} />;
     }
-  }
-}
-
-class Dummmy extends Component {
-  componentDidMount() {
-    this.props.navigation.navigate("Home");
-  }
-
-  render() {
-    return <View />;
   }
 }
 /* 
