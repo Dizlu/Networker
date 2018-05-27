@@ -1,17 +1,10 @@
 // @flow
-import React, { Component } from "react";
-import { Screen, ListView, Text, Button, Title, Caption } from "@shoutem/ui";
-import XMLParse from "../../../services/XMLParse";
-import ActivityCard from "../activity-card";
+import React, { Component } from 'react';
+import { Screen, ListView, Text, Button, Title, Caption } from '@shoutem/ui';
+import XMLParse from '../../../services/XMLParse';
+import ActivityCard from '../activity-card';
 
-import firebase from "react-native-firebase";
-
-firebase
-  .firestore()
-  .collection("Events")
-  .doc("ZK7Q5ZedOgxnVFZjKPHf")
-  .get()
-  .then(doc => console.log(doc.data()));
+import firebase from 'react-native-firebase';
 
 type Props = {
   navigation: Object,
@@ -26,7 +19,8 @@ type activity = {
 };
 
 type State = {
-  activities: Array<activity>
+  activities: Array<activity>,
+  firestoreActivity: Object
 };
 
 type xmlItem = {
@@ -44,13 +38,27 @@ class Category extends Component<Props, State> {
       headerRight: (
         <Button
           styleName="textual"
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => navigation.navigate('Profile')}
         >
           <Text>Profile</Text>
         </Button>
       )
     };
   };
+
+  fetchEventsFromFirestore(collection = 'Events', limit = 50) {
+    firebase
+      .firestore()
+      .collection(collection)
+      .limit(limit)
+      .get()
+      .then(data => {
+        this.setState(state => ({
+          ...state,
+          activities: [data.docs[0].data(), ...state.activities]
+        }));
+      });
+  }
 
   componentDidMount() {
     const rssLink = this.props.link;
@@ -60,6 +68,7 @@ class Category extends Component<Props, State> {
         activities: [...state.activities, ...parsedData.rss.channel.item]
       }));
     });
+    this.fetchEventsFromFirestore();
   }
 
   state = {
@@ -67,7 +76,7 @@ class Category extends Component<Props, State> {
   };
 
   goToDetail = event => {
-    this.props.navigation.navigate("EventDetail", event);
+    this.props.navigation.navigate('EventDetail', event);
   };
 
   renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
@@ -78,7 +87,7 @@ class Category extends Component<Props, State> {
         <Button
           styleName="textual"
           onPress={() => {
-            this.props.navigation.navigate("EventForm", {
+            this.props.navigation.navigate('EventForm', {
               addItem: item =>
                 this.setState(state => ({
                   ...state,
