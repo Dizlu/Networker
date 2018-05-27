@@ -15,6 +15,7 @@ import {
 } from '@shoutem/ui';
 import CustomPicker from './utils/picker';
 import ActivityCard from './activity-card';
+import DateTimePicker from 'react-native-modal-datetime-picker';
 
 type State = {
   name: string,
@@ -23,9 +24,12 @@ type State = {
     name: string,
     value: number
   },
-  uuid: string,
+  start: Date,
+  end: Date,
+  dateTimePickerStartVisible: boolean,
   previewVisible: boolean,
   selectVisible: boolean,
+  uuid: string,
   pubDate: Date
 };
 
@@ -43,8 +47,11 @@ class ActivityForm extends Component<Props, State> {
       value: 1
     },
     uuid: uuid(),
+    start: new Date(),
+    end: new Date(),
     previewVisible: false,
     selectVisible: false,
+    dateTimePickerStartVisible: false,
     pubDate: new Date()
   };
 
@@ -76,6 +83,23 @@ class ActivityForm extends Component<Props, State> {
     }
   ];
 
+  _showDateTimePicker = () => {
+    this.setState(state => ({ ...state, dateTimePickerStartVisible: true }));
+  };
+
+  _hideDateTimePicker = () => {
+    this.setState(state => ({ ...state, dateTimePickerStartVisible: false }));
+  };
+
+  _handleDatePicked = date => {
+    console.log('A date has been picked: ', date);
+    this.setState(state => ({
+      ...state,
+      start: date
+    }));
+    this._hideDateTimePicker();
+  };
+
   render() {
     return (
       <Screen>
@@ -102,6 +126,9 @@ class ActivityForm extends Component<Props, State> {
               }
               autoCorrect={false}
             />
+            <Title> Dates of events: </Title>
+            <Text>Starts at: {this.state.start.toLocaleDateString()}</Text>
+            <Text>Ends at: {this.state.end.toLocaleDateString()}</Text>
           </Tile>
           <View styleName="content horizontal space-between">
             <View style={{ margin: 15 }}>
@@ -123,6 +150,16 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           </View>
+          <Button onPress={this._showDateTimePicker}>
+            <Text>Choose start date of event</Text>
+          </Button>
+          <DateTimePicker
+            isVisible={this.state.dateTimePickerStartVisible}
+            onConfirm={this._handleDatePicked}
+            onCancel={this._hideDateTimePicker}
+            mode={'datetime'}
+            is24Hour={true}
+          />
           {this.state.selectVisible && (
             <View>
               <Button
@@ -147,7 +184,6 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           )}
-
           {this.state.previewVisible && <ActivityCard {...this.state} />}
           <Button
             style={{ margin: 10 }}
