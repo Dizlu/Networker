@@ -1,13 +1,13 @@
 /**
  * @flow
  */
-import { StackNavigator } from "react-navigation";
-import ActivityMap from "./src/components/activity-map";
-import EventDetail from "./src/components/event-detail/event-detail";
-import EventForm from "./src/components/event-form";
-import Profile from "./src/components/profile";
-import Category from "./src/components/views/category";
-import { LogIn } from "./src/components/authentication/log-in";
+import { StackNavigator } from 'react-navigation';
+import ActivityMap from './src/components/activity-map';
+import EventDetail from './src/components/event-detail/event-detail';
+import Profile from './src/components/profile';
+import Category from './src/components/views/category';
+import { LogIn } from './src/components/authentication/log-in';
+import ActivityForm from './src/components/activity-form';
 
 export default StackNavigator(
   {
@@ -21,7 +21,7 @@ export default StackNavigator(
       screen: Profile
     },
     EventForm: {
-      screen: EventForm
+      screen: ActivityForm
     },
     EventDetail: {
       screen: EventDetail
@@ -31,6 +31,6 @@ export default StackNavigator(
     }
   },
   {
-    initialRouteName: "Home"
+    initialRouteName: 'Home'
   }
 );

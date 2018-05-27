@@ -12,6 +12,7 @@ import {
   TextInput,
   Switch,
   Tile,
+  Divider,
   TouchableOpacity
 } from '@shoutem/ui';
 import CustomPicker from './utils/picker';
@@ -36,6 +37,7 @@ type State = {
 };
 
 type Props = {
+  navigation: Object,
   addActivity: (state: Object<>) => void
 };
 
@@ -51,7 +53,7 @@ class ActivityForm extends Component<Props, State> {
     uuid: uuid(),
     start: new Date(),
     end: new Date(),
-    previewVisible: false,
+    previewVisible: true,
     selectVisible: false,
     dateTimePickerStartVisible: false,
     dateTimePickerEndVisible: false,
@@ -120,7 +122,27 @@ class ActivityForm extends Component<Props, State> {
     this._hideDateTimePickerEnd();
   };
 
+  initialCoordinates = {
+    latitude: 51.2465,
+    longitude: 22.5684,
+    latitudeDelta: 0.0422,
+    longitudeDelta: 0.0221
+  };
+
+  markers = [
+    {
+      coordinate: {
+        latitude: 51.2365,
+        longitude: 22.5584
+      },
+      title: 'Test marker',
+      description: 'Test marker longer description'
+    }
+  ];
+
   render() {
+    const props = this.props.navigation.state.params;
+    const navigation = this.props.navigation;
     return (
       <Screen>
         <ScrollView>
@@ -146,7 +168,8 @@ class ActivityForm extends Component<Props, State> {
               }
               autoCorrect={false}
             />
-            <View style={{ margin: 15 }}>
+            <Divider styleName="line" />
+            <View style={{ marginVertical: 15 }}>
               <Subtitle style={{ marginVertical: 15 }}>
                 {' '}
                 Dates of events:{' '}
@@ -183,17 +206,26 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           </View>
-          <Button onPress={() => {}}>
+          <Button
+            onPress={() => {
+              navigation.navigate('ActivityMap', {
+                coordinates: this.initialCoordinates,
+                markers: this.markers
+              });
+            }}
+          >
             <Text>Choose location</Text>
           </Button>
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
+            minimumDate={new Date()}
             onConfirm={this._handleStartDatePicked}
             onCancel={this._hideDateTimePickerStart}
             mode={'datetime'}
             is24Hour={true}
           />
           <DateTimePicker
+            minimumDate={new Date()}
             isVisible={this.state.dateTimePickerEndVisible}
             onConfirm={this._handleEndDatePicked}
             onCancel={this._hideDateTimePickerEnd}
@@ -233,7 +265,8 @@ class ActivityForm extends Component<Props, State> {
         <Button
           style={{ margin: 10 }}
           onPress={() => {
-            this.props.addActivity(this.state);
+            props.addItem(this.state);
+            navigation.goBack();
             this.setState(state => ({ ...state, uuid: uuid() }));
           }}
         >
