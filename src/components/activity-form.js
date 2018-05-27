@@ -147,7 +147,10 @@ class ActivityForm extends Component<Props, State> {
               autoCorrect={false}
             />
             <View style={{ margin: 15 }}>
-              <Subtitle> Dates of events: </Subtitle>
+              <Subtitle style={{ marginVertical: 15 }}>
+                {' '}
+                Dates of events:{' '}
+              </Subtitle>
               <TouchableOpacity onPress={this._showDateTimePickerStart}>
                 <Text style={{ margin: 5 }}>
                   Starts at: {this.state.start.toLocaleDateString()}
@@ -170,7 +173,7 @@ class ActivityForm extends Component<Props, State> {
                 <Text>Choose category</Text>
               </Button>
             </View>
-            <View style={{ margin: 15 }}>
+            <View style={{ margin: 15, marginRight: 30 }}>
               <Subtitle>Show preview</Subtitle>
               <Switch
                 value={this.state.previewVisible}
@@ -180,6 +183,9 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           </View>
+          <Button onPress={() => {}}>
+            <Text>Choose location</Text>
+          </Button>
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
             onConfirm={this._handleStartDatePicked}
@@ -195,8 +201,12 @@ class ActivityForm extends Component<Props, State> {
             is24Hour={true}
           />
           {this.state.selectVisible && (
-            <View>
+            <View
+              styleName="fill-parent"
+              style={{ margin: 15, backgroundColor: 'white' }}
+            >
               <Button
+                styleName="secondary"
                 onPress={() =>
                   this.setState(state => ({ ...state, selectVisible: false }))
                 }
@@ -219,16 +229,16 @@ class ActivityForm extends Component<Props, State> {
             </View>
           )}
           {this.state.previewVisible && <ActivityCard {...this.state} />}
-          <Button
-            style={{ margin: 10 }}
-            onPress={() => {
-              this.props.addActivity(this.state);
-              this.setState(state => ({ ...state, uuid: uuid() }));
-            }}
-          >
-            <Text>Add event</Text>
-          </Button>
         </ScrollView>
+        <Button
+          style={{ margin: 10 }}
+          onPress={() => {
+            this.props.addActivity(this.state);
+            this.setState(state => ({ ...state, uuid: uuid() }));
+          }}
+        >
+          <Text>Add event</Text>
+        </Button>
       </Screen>
     );
   }
