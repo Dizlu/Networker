@@ -11,7 +11,8 @@ import {
   Text,
   TextInput,
   Switch,
-  Tile
+  Tile,
+  TouchableOpacity
 } from '@shoutem/ui';
 import CustomPicker from './utils/picker';
 import ActivityCard from './activity-card';
@@ -27,6 +28,7 @@ type State = {
   start: Date,
   end: Date,
   dateTimePickerStartVisible: boolean,
+  dateTimePickerEndVisible: boolean,
   previewVisible: boolean,
   selectVisible: boolean,
   uuid: string,
@@ -52,6 +54,7 @@ class ActivityForm extends Component<Props, State> {
     previewVisible: false,
     selectVisible: false,
     dateTimePickerStartVisible: false,
+    dateTimePickerEndVisible: false,
     pubDate: new Date()
   };
 
@@ -83,21 +86,38 @@ class ActivityForm extends Component<Props, State> {
     }
   ];
 
-  _showDateTimePicker = () => {
+  _showDateTimePickerStart = () => {
     this.setState(state => ({ ...state, dateTimePickerStartVisible: true }));
   };
 
-  _hideDateTimePicker = () => {
+  _hideDateTimePickerStart = () => {
     this.setState(state => ({ ...state, dateTimePickerStartVisible: false }));
   };
 
-  _handleDatePicked = date => {
-    console.log('A date has been picked: ', date);
+  _handleStartDatePicked = date => {
+    if (!date) return;
     this.setState(state => ({
       ...state,
       start: date
     }));
-    this._hideDateTimePicker();
+    this._hideDateTimePickerStart();
+  };
+
+  _showDateTimePickerEnd = () => {
+    this.setState(state => ({ ...state, dateTimePickerEndVisible: true }));
+  };
+
+  _hideDateTimePickerEnd = () => {
+    this.setState(state => ({ ...state, dateTimePickerEndVisible: false }));
+  };
+
+  _handleEndDatePicked = date => {
+    if (!date) return;
+    this.setState(state => ({
+      ...state,
+      start: date
+    }));
+    this._hideDateTimePickerEnd();
   };
 
   render() {
@@ -126,9 +146,19 @@ class ActivityForm extends Component<Props, State> {
               }
               autoCorrect={false}
             />
-            <Title> Dates of events: </Title>
-            <Text>Starts at: {this.state.start.toLocaleDateString()}</Text>
-            <Text>Ends at: {this.state.end.toLocaleDateString()}</Text>
+            <View style={{ margin: 15 }}>
+              <Subtitle> Dates of events: </Subtitle>
+              <TouchableOpacity onPress={this._showDateTimePickerStart}>
+                <Text style={{ margin: 5 }}>
+                  Starts at: {this.state.start.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={this._showDateTimePickerEnd}>
+                <Text style={{ margin: 5 }}>
+                  Ends at: {this.state.end.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </Tile>
           <View styleName="content horizontal space-between">
             <View style={{ margin: 15 }}>
@@ -150,13 +180,17 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           </View>
-          <Button onPress={this._showDateTimePicker}>
-            <Text>Choose start date of event</Text>
-          </Button>
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
-            onConfirm={this._handleDatePicked}
-            onCancel={this._hideDateTimePicker}
+            onConfirm={this._handleStartDatePicked}
+            onCancel={this._hideDateTimePickerStart}
+            mode={'datetime'}
+            is24Hour={true}
+          />
+          <DateTimePicker
+            isVisible={this.state.dateTimePickerEndVisible}
+            onConfirm={this._handleEndDatePicked}
+            onCancel={this._hideDateTimePickerEnd}
             mode={'datetime'}
             is24Hour={true}
           />
