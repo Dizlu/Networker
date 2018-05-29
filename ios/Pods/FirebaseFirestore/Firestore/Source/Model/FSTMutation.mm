@@ -23,7 +23,6 @@
 
 #import "FIRTimestamp.h"
 
-#import "Firestore/Source/Core/FSTSnapshotVersion.h"
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Model/FSTFieldValue.h"
 #import "Firestore/Source/Util/FSTAssert.h"
@@ -36,6 +35,8 @@
 #include "Firestore/core/src/firebase/firestore/model/precondition.h"
 #include "Firestore/core/src/firebase/firestore/model/transform_operations.h"
 
+#include "absl/types/optional.h"
+
 using firebase::firestore::model::ArrayTransform;
 using firebase::firestore::model::DocumentKey;
 using firebase::firestore::model::FieldMask;
@@ -43,21 +44,28 @@ using firebase::firestore::model::FieldPath;
 using firebase::firestore::model::FieldTransform;
 using firebase::firestore::model::Precondition;
 using firebase::firestore::model::ServerTimestampTransform;
+using firebase::firestore::model::SnapshotVersion;
 using firebase::firestore::model::TransformOperation;
 
 NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - FSTMutationResult
 
-@implementation FSTMutationResult
+@implementation FSTMutationResult {
+  absl::optional<SnapshotVersion> _version;
+}
 
-- (instancetype)initWithVersion:(nullable FSTSnapshotVersion *)version
+- (instancetype)initWithVersion:(absl::optional<SnapshotVersion>)version
                transformResults:(nullable NSArray<FSTFieldValue *> *)transformResults {
   if (self = [super init]) {
-    _version = version;
+    _version = std::move(version);
     _transformResults = transformResults;
   }
   return self;
+}
+
+- (const absl::optional<SnapshotVersion> &)version {
+  return _version;
 }
 
 @end
@@ -157,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
     // If the document didn't exist before, create it.
     return [FSTDocument documentWithData:self.value
                                      key:self.key
-                                 version:[FSTSnapshotVersion noVersion]
+                                 version:SnapshotVersion::None()
                        hasLocalMutations:hasLocalMutations];
   }
 
@@ -239,10 +247,10 @@ NS_ASSUME_NONNULL_BEGIN
   if (!maybeDoc || [maybeDoc isMemberOfClass:[FSTDeletedDocument class]]) {
     // Precondition applied, so create the document if necessary
     const DocumentKey &key = maybeDoc ? maybeDoc.key : self.key;
-    FSTSnapshotVersion *version = maybeDoc ? maybeDoc.version : [FSTSnapshotVersion noVersion];
+    SnapshotVersion version = maybeDoc ? maybeDoc.version : SnapshotVersion::None();
     maybeDoc = [FSTDocument documentWithData:[FSTObjectValue objectValue]
                                          key:key
-                                     version:version
+                                     version:std::move(version)
                            hasLocalMutations:hasLocalMutations];
   }
 
@@ -384,30 +392,15 @@ serverTransformResultsWithBaseDocument:(nullable FSTMaybeDocument *)baseDocument
 
   for (NSUInteger i = 0; i < serverTransformResults.count; i++) {
     const FieldTransform &fieldTransform = self.fieldTransforms[i];
+    const TransformOperation &transform = fieldTransform.transformation();
+
     FSTFieldValue *previousValue = nil;
     if ([baseDocument isMemberOfClass:[FSTDocument class]]) {
       previousValue = [((FSTDocument *)baseDocument) fieldForPath:fieldTransform.path()];
     }
 
-    FSTFieldValue *transformResult;
-    // The server just sends null as the transform result for array union / remove operations, so
-    // we have to calculate a result the same as we do for local applications.
-    if (fieldTransform.transformation().type() == TransformOperation::Type::ArrayUnion) {
-      transformResult = [self
-          arrayUnionResultWithElements:ArrayTransform::Elements(fieldTransform.transformation())
-                         previousValue:previousValue];
-
-    } else if (fieldTransform.transformation().type() == TransformOperation::Type::ArrayRemove) {
-      transformResult = [self
-          arrayRemoveResultWithElements:ArrayTransform::Elements(fieldTransform.transformation())
-                          previousValue:previousValue];
-
-    } else {
-      // Just use the server-supplied result.
-      transformResult = serverTransformResults[i];
-    }
-
-    [transformResults addObject:transformResult];
+    [transformResults
+        addObject:transform.ApplyToRemoteDocument(previousValue, serverTransformResults[i])];
   }
   return transformResults;
 }
@@ -426,75 +419,16 @@ serverTransformResultsWithBaseDocument:(nullable FSTMaybeDocument *)baseDocument
                                                           writeTime:(FIRTimestamp *)localWriteTime {
   NSMutableArray<FSTFieldValue *> *transformResults = [NSMutableArray array];
   for (const FieldTransform &fieldTransform : self.fieldTransforms) {
+    const TransformOperation &transform = fieldTransform.transformation();
+
     FSTFieldValue *previousValue = nil;
     if ([baseDocument isMemberOfClass:[FSTDocument class]]) {
       previousValue = [((FSTDocument *)baseDocument) fieldForPath:fieldTransform.path()];
     }
 
-    FSTFieldValue *transformResult;
-    if (fieldTransform.transformation().type() == TransformOperation::Type::ServerTimestamp) {
-      transformResult =
-          [FSTServerTimestampValue serverTimestampValueWithLocalWriteTime:localWriteTime
-                                                            previousValue:previousValue];
-
-    } else if (fieldTransform.transformation().type() == TransformOperation::Type::ArrayUnion) {
-      transformResult = [self
-          arrayUnionResultWithElements:ArrayTransform::Elements(fieldTransform.transformation())
-                         previousValue:previousValue];
-
-    } else if (fieldTransform.transformation().type() == TransformOperation::Type::ArrayRemove) {
-      transformResult = [self
-          arrayRemoveResultWithElements:ArrayTransform::Elements(fieldTransform.transformation())
-                          previousValue:previousValue];
-
-    } else {
-      FSTFail(@"Encountered unknown transform: %d type", fieldTransform.transformation().type());
-    }
-
-    [transformResults addObject:transformResult];
+    [transformResults addObject:transform.ApplyToLocalView(previousValue, localWriteTime)];
   }
   return transformResults;
-}
-
-/**
- * Transforms the provided `previousValue` via the provided `elements`. Used both for local
- * application and after server acknowledgement.
- */
-- (FSTFieldValue *)arrayUnionResultWithElements:(const std::vector<FSTFieldValue *> &)elements
-                                  previousValue:(FSTFieldValue *)previousValue {
-  NSMutableArray<FSTFieldValue *> *result = [self coercedFieldValuesArray:previousValue];
-  for (FSTFieldValue *element : elements) {
-    if (![result containsObject:element]) {
-      [result addObject:element];
-    }
-  }
-  return [[FSTArrayValue alloc] initWithValueNoCopy:result];
-}
-
-/**
- * Transforms the provided `previousValue` via the provided `elements`. Used both for local
- * application and after server acknowledgement.
- */
-- (FSTFieldValue *)arrayRemoveResultWithElements:(const std::vector<FSTFieldValue *> &)elements
-                                   previousValue:(FSTFieldValue *)previousValue {
-  NSMutableArray<FSTFieldValue *> *result = [self coercedFieldValuesArray:previousValue];
-  for (FSTFieldValue *element : elements) {
-    [result removeObject:element];
-  }
-  return [[FSTArrayValue alloc] initWithValueNoCopy:result];
-}
-
-/**
- * Inspects the provided value, returning a mutable copy of the internal array if it's an
- * FSTArrayValue and an empty mutable array if it's nil or any other type of FSTFieldValue.
- */
-- (NSMutableArray<FSTFieldValue *> *)coercedFieldValuesArray:(nullable FSTFieldValue *)value {
-  if ([value isMemberOfClass:[FSTArrayValue class]]) {
-    return [NSMutableArray arrayWithArray:((FSTArrayValue *)value).internalValue];
-  } else {
-    // coerce to empty array.
-    return [NSMutableArray array];
-  }
 }
 
 - (FSTObjectValue *)transformObject:(FSTObjectValue *)objectValue
@@ -556,7 +490,7 @@ serverTransformResultsWithBaseDocument:(nullable FSTMaybeDocument *)baseDocument
     FSTAssert([maybeDoc.key isEqual:self.key], @"Can only delete a document with the same key");
   }
 
-  return [FSTDeletedDocument documentWithKey:self.key version:[FSTSnapshotVersion noVersion]];
+  return [FSTDeletedDocument documentWithKey:self.key version:SnapshotVersion::None()];
 }
 
 @end

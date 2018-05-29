@@ -268,7 +268,7 @@ typedef NS_ENUM(NSInteger, FSTUserDataSource) {
 }
 
 - (instancetype)contextForField:(NSString *)fieldName {
-  std::unique_ptr<FieldPath> path{};
+  std::unique_ptr<FieldPath> path;
   if (_path) {
     path = absl::make_unique<FieldPath>(_path->Append(util::MakeString(fieldName)));
   }
@@ -282,7 +282,7 @@ typedef NS_ENUM(NSInteger, FSTUserDataSource) {
 }
 
 - (instancetype)contextForFieldPath:(const FieldPath &)fieldPath {
-  std::unique_ptr<FieldPath> path{};
+  std::unique_ptr<FieldPath> path;
   if (_path) {
     path = absl::make_unique<FieldPath>(_path->Append(fieldPath));
   }
@@ -412,7 +412,7 @@ typedef NS_ENUM(NSInteger, FSTUserDataSource) {
   return self;
 }
 
-- (FSTParsedSetData *)parsedMergeData:(id)input {
+- (FSTParsedSetData *)parsedMergeData:(id)input fieldMask:(nullable NSArray<id> *)fieldMask {
   // NOTE: The public API is typed as NSDictionary but we type 'input' as 'id' since we can't trust
   // Obj-C to verify the type for us.
   if (![input isKindOfClass:[NSDictionary class]]) {
@@ -424,9 +424,45 @@ typedef NS_ENUM(NSInteger, FSTUserDataSource) {
                                     path:absl::make_unique<FieldPath>(FieldPath::EmptyPath())];
   FSTObjectValue *updateData = (FSTObjectValue *)[self parseData:input context:context];
 
+  FieldMask convertedFieldMask;
+  std::vector<FieldTransform> convertedFieldTransform;
+
+  if (fieldMask) {
+    __block std::vector<FieldPath> fieldMaskPaths;
+    [fieldMask enumerateObjectsUsingBlock:^(id fieldPath, NSUInteger idx, BOOL *stop) {
+      FieldPath path;
+
+      if ([fieldPath isKindOfClass:[NSString class]]) {
+        path = [FIRFieldPath pathWithDotSeparatedString:fieldPath].internalValue;
+      } else if ([fieldPath isKindOfClass:[FIRFieldPath class]]) {
+        path = ((FIRFieldPath *)fieldPath).internalValue;
+      } else {
+        FSTThrowInvalidArgument(
+            @"All elements in mergeFields: must be NSStrings or FIRFieldPaths.");
+      }
+
+      if ([updateData valueForPath:path] == nil) {
+        FSTThrowInvalidArgument(
+            @"Field '%s' is specified in your field mask but missing from your input data.",
+            path.CanonicalString().c_str());
+      }
+
+      fieldMaskPaths.push_back(path);
+    }];
+    convertedFieldMask = FieldMask(fieldMaskPaths);
+    std::copy_if(context.fieldTransforms->begin(), context.fieldTransforms->end(),
+                 std::back_inserter(convertedFieldTransform),
+                 [&](const FieldTransform &fieldTransform) {
+                   return convertedFieldMask.covers(fieldTransform.path());
+                 });
+  } else {
+    convertedFieldMask = FieldMask{*context.fieldMask};
+    convertedFieldTransform = *context.fieldTransforms;
+  }
+
   return [[FSTParsedSetData alloc] initWithData:updateData
-                                      fieldMask:FieldMask{*context.fieldMask}
-                                fieldTransforms:*context.fieldTransforms];
+                                      fieldMask:convertedFieldMask
+                                fieldTransforms:convertedFieldTransform];
 }
 
 - (FSTParsedSetData *)parsedSetData:(id)input {
@@ -454,14 +490,14 @@ typedef NS_ENUM(NSInteger, FSTUserDataSource) {
 
   NSDictionary *dict = input;
 
-  __block std::vector<FieldPath> fieldMaskPaths{};
+  __block std::vector<FieldPath> fieldMaskPaths;
   __block FSTObjectValue *updateData = [FSTObjectValue objectValue];
 
   FSTParseContext *context =
       [FSTParseContext contextWithSource:FSTUserDataSourceUpdate
                                     path:absl::make_unique<FieldPath>(FieldPath::EmptyPath())];
   [dict enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-    FieldPath path{};
+    FieldPath path;
 
     if ([key isKindOfClass:[NSString class]]) {
       path = [FIRFieldPath pathWithDotSeparatedString:key].internalValue;

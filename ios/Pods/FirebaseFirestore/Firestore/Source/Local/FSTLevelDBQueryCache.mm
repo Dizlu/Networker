@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #import "Firestore/Protos/objc/firestore/local/Target.pbobjc.h"
 #import "Firestore/Source/Core/FSTQuery.h"
@@ -28,6 +29,7 @@
 #import "Firestore/Source/Util/FSTAssert.h"
 
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
+#include "Firestore/core/src/firebase/firestore/model/snapshot_version.h"
 #include "absl/strings/match.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -35,9 +37,11 @@ NS_ASSUME_NONNULL_BEGIN
 using firebase::firestore::local::LevelDbTransaction;
 using Firestore::StringView;
 using firebase::firestore::model::DocumentKey;
+using firebase::firestore::model::SnapshotVersion;
 using leveldb::DB;
 using leveldb::Slice;
 using leveldb::Status;
+using firebase::firestore::model::DocumentKeySet;
 
 @interface FSTLevelDBQueryCache ()
 
@@ -55,7 +59,7 @@ using leveldb::Status;
    * The last received snapshot version. This is part of `metadata` but we store it separately to
    * avoid extra conversion to/from GPBTimestamp.
    */
-  FSTSnapshotVersion *_lastRemoteSnapshotVersion;
+  SnapshotVersion _lastRemoteSnapshotVersion;
 }
 
 + (nullable FSTPBTargetGlobal *)readTargetMetadataWithTransaction:
@@ -135,13 +139,14 @@ using leveldb::Status;
   return self.metadata.highestListenSequenceNumber;
 }
 
-- (FSTSnapshotVersion *)lastRemoteSnapshotVersion {
+- (const SnapshotVersion &)lastRemoteSnapshotVersion {
   return _lastRemoteSnapshotVersion;
 }
 
-- (void)setLastRemoteSnapshotVersion:(FSTSnapshotVersion *)snapshotVersion {
-  _lastRemoteSnapshotVersion = snapshotVersion;
-  self.metadata.lastRemoteSnapshotVersion = [self.serializer encodedVersion:snapshotVersion];
+- (void)setLastRemoteSnapshotVersion:(SnapshotVersion)snapshotVersion {
+  _lastRemoteSnapshotVersion = std::move(snapshotVersion);
+  self.metadata.lastRemoteSnapshotVersion =
+      [self.serializer encodedVersion:_lastRemoteSnapshotVersion];
   _db.currentTransaction->Put([FSTLevelDBTargetGlobalKey key], self.metadata);
 }
 
@@ -278,30 +283,30 @@ using leveldb::Status;
 
 #pragma mark Matching Key tracking
 
-- (void)addMatchingKeys:(FSTDocumentKeySet *)keys forTargetID:(FSTTargetID)targetID {
+- (void)addMatchingKeys:(const DocumentKeySet &)keys forTargetID:(FSTTargetID)targetID {
   // Store an empty value in the index which is equivalent to serializing a GPBEmpty message. In the
   // future if we wanted to store some other kind of value here, we can parse these empty values as
   // with some other protocol buffer (and the parser will see all default values).
   std::string emptyBuffer;
 
-  [keys enumerateObjectsUsingBlock:^(FSTDocumentKey *documentKey, BOOL *stop) {
+  for (const DocumentKey &key : keys) {
     self->_db.currentTransaction->Put(
-        [FSTLevelDBTargetDocumentKey keyWithTargetID:targetID documentKey:documentKey],
-        emptyBuffer);
+        [FSTLevelDBTargetDocumentKey keyWithTargetID:targetID documentKey:key], emptyBuffer);
     self->_db.currentTransaction->Put(
-        [FSTLevelDBDocumentTargetKey keyWithDocumentKey:documentKey targetID:targetID],
-        emptyBuffer);
-  }];
+        [FSTLevelDBDocumentTargetKey keyWithDocumentKey:key targetID:targetID], emptyBuffer);
+    [self->_db.referenceDelegate addReference:key target:targetID];
+  };
 }
 
-- (void)removeMatchingKeys:(FSTDocumentKeySet *)keys forTargetID:(FSTTargetID)targetID {
-  [keys enumerateObjectsUsingBlock:^(FSTDocumentKey *key, BOOL *stop) {
+- (void)removeMatchingKeys:(const DocumentKeySet &)keys forTargetID:(FSTTargetID)targetID {
+  for (const DocumentKey &key : keys) {
     self->_db.currentTransaction->Delete(
         [FSTLevelDBTargetDocumentKey keyWithTargetID:targetID documentKey:key]);
     self->_db.currentTransaction->Delete(
         [FSTLevelDBDocumentTargetKey keyWithDocumentKey:key targetID:targetID]);
+    [self->_db.referenceDelegate removeReference:key target:targetID];
     [self.garbageCollector addPotentialGarbageKey:key];
-  }];
+  }
 }
 
 - (void)removeMatchingKeysForTargetID:(FSTTargetID)targetID {
@@ -327,12 +332,12 @@ using leveldb::Status;
   }
 }
 
-- (FSTDocumentKeySet *)matchingKeysForTargetID:(FSTTargetID)targetID {
+- (DocumentKeySet)matchingKeysForTargetID:(FSTTargetID)targetID {
   std::string indexPrefix = [FSTLevelDBTargetDocumentKey keyPrefixWithTargetID:targetID];
   auto indexIterator = _db.currentTransaction->NewIterator();
   indexIterator->Seek(indexPrefix);
 
-  FSTDocumentKeySet *result = [FSTDocumentKeySet keySet];
+  DocumentKeySet result;
   FSTLevelDBTargetDocumentKey *rowKey = [[FSTLevelDBTargetDocumentKey alloc] init];
   for (; indexIterator->Valid(); indexIterator->Next()) {
     absl::string_view indexKey = indexIterator->key();
@@ -342,7 +347,7 @@ using leveldb::Status;
       break;
     }
 
-    result = [result setByAddingObject:rowKey.documentKey];
+    result = result.insert(rowKey.documentKey);
   }
 
   return result;

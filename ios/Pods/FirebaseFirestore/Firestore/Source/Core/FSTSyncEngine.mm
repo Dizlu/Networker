@@ -21,10 +21,10 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <utility>
 
 #import "FIRFirestoreErrors.h"
 #import "Firestore/Source/Core/FSTQuery.h"
-#import "Firestore/Source/Core/FSTSnapshotVersion.h"
 #import "Firestore/Source/Core/FSTTransaction.h"
 #import "Firestore/Source/Core/FSTView.h"
 #import "Firestore/Source/Core/FSTViewSnapshot.h"
@@ -45,12 +45,15 @@
 #include "Firestore/core/src/firebase/firestore/auth/user.h"
 #include "Firestore/core/src/firebase/firestore/core/target_id_generator.h"
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
+#include "Firestore/core/src/firebase/firestore/model/snapshot_version.h"
 
 using firebase::firestore::auth::HashUser;
 using firebase::firestore::auth::User;
 using firebase::firestore::core::TargetIdGenerator;
 using firebase::firestore::model::DocumentKey;
+using firebase::firestore::model::SnapshotVersion;
 using firebase::firestore::model::TargetId;
+using firebase::firestore::model::DocumentKeySet;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -184,9 +187,9 @@ static const FSTListenSequenceNumber kIrrelevantSequenceNumber = -1;
 
   FSTQueryData *queryData = [self.localStore allocateQuery:query];
   FSTDocumentDictionary *docs = [self.localStore executeQuery:query];
-  FSTDocumentKeySet *remoteKeys = [self.localStore remoteDocumentKeysForTarget:queryData.targetID];
+  DocumentKeySet remoteKeys = [self.localStore remoteDocumentKeysForTarget:queryData.targetID];
 
-  FSTView *view = [[FSTView alloc] initWithQuery:query remoteDocuments:remoteKeys];
+  FSTView *view = [[FSTView alloc] initWithQuery:query remoteDocuments:std::move(remoteKeys)];
   FSTViewDocumentChanges *viewDocChanges = [view computeChangesWithDocuments:docs];
   FSTViewChange *viewChange = [view applyChangesToDocuments:viewDocChanges];
   FSTAssert(viewChange.limboChanges.count == 0,
@@ -301,8 +304,7 @@ static const FSTListenSequenceNumber kIrrelevantSequenceNumber = -1;
     if (iter == self->_limboKeysByTarget.end()) {
       FSTQueryView *qv = self.queryViewsByTarget[targetID];
       FSTAssert(qv, @"Missing queryview for non-limbo query: %i", [targetID intValue]);
-      [remoteEvent filterUpdatesFromTargetChange:targetChange
-                               existingDocuments:qv.view.syncedDocuments];
+      [targetChange.mapping filterUpdatesUsingExistingKeys:qv.view.syncedDocuments];
     } else {
       [remoteEvent synthesizeDeleteForLimboTargetChange:targetChange key:iter->second];
     }
@@ -346,10 +348,15 @@ static const FSTListenSequenceNumber kIrrelevantSequenceNumber = -1;
     NSMutableDictionary<NSNumber *, FSTTargetChange *> *targetChanges =
         [NSMutableDictionary dictionary];
     FSTDeletedDocument *doc =
-        [FSTDeletedDocument documentWithKey:limboKey version:[FSTSnapshotVersion noVersion]];
-    FSTRemoteEvent *event = [FSTRemoteEvent eventWithSnapshotVersion:[FSTSnapshotVersion noVersion]
-                                                       targetChanges:targetChanges
-                                                     documentUpdates:{{limboKey, doc}}];
+        [FSTDeletedDocument documentWithKey:limboKey version:SnapshotVersion::None()];
+    DocumentKeySet limboDocuments = DocumentKeySet{doc.key};
+    FSTRemoteEvent *event =
+        [[FSTRemoteEvent alloc] initWithSnapshotVersion:SnapshotVersion::None()
+                                          targetChanges:targetChanges
+                                        documentUpdates:{
+                                          { limboKey, doc }
+                                        }
+                                         limboDocuments:std::move(limboDocuments)];
     [self applyRemoteEvent:event];
   } else {
     FSTQueryView *queryView = self.queryViewsByTarget[@(targetID)];

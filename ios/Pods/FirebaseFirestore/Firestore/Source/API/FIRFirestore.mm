@@ -45,12 +45,16 @@
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
 #include "absl/memory/memory.h"
 
+#include "Firestore/core/src/firebase/firestore/util/executor_libdispatch.h"
+
 namespace util = firebase::firestore::util;
 using firebase::firestore::auth::CredentialsProvider;
 using firebase::firestore::auth::FirebaseCredentialsProvider;
 using firebase::firestore::core::DatabaseInfo;
 using firebase::firestore::model::DatabaseId;
 using firebase::firestore::model::ResourcePath;
+using util::internal::Executor;
+using util::internal::ExecutorLibdispatch;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -272,12 +276,13 @@ extern "C" NSString *const FIRFirestoreErrorDomain = @"FIRFirestoreErrorDomain";
       const DatabaseInfo database_info(*self.databaseID, util::MakeStringView(_persistenceKey),
                                        util::MakeStringView(_settings.host), _settings.sslEnabled);
 
-      FSTDispatchQueue *userDispatchQueue = [FSTDispatchQueue queueWith:_settings.dispatchQueue];
+      std::unique_ptr<Executor> userExecutor =
+          absl::make_unique<ExecutorLibdispatch>(_settings.dispatchQueue);
 
       _client = [FSTFirestoreClient clientWithDatabaseInfo:database_info
                                             usePersistence:_settings.persistenceEnabled
                                        credentialsProvider:_credentialsProvider.get()
-                                         userDispatchQueue:userDispatchQueue
+                                              userExecutor:std::move(userExecutor)
                                        workerDispatchQueue:_workerDispatchQueue];
     }
   }
@@ -287,6 +292,11 @@ extern "C" NSString *const FIRFirestoreErrorDomain = @"FIRFirestoreErrorDomain";
   if (!collectionPath) {
     FSTThrowInvalidArgument(@"Collection path cannot be nil.");
   }
+  if ([collectionPath containsString:@"//"]) {
+    FSTThrowInvalidArgument(@"Invalid path (%@). Paths must not contain // in them.",
+                            collectionPath);
+  }
+
   [self ensureClientConfigured];
   const ResourcePath path = ResourcePath::FromString(util::MakeStringView(collectionPath));
   return [FIRCollectionReference referenceWithPath:path firestore:self];
@@ -296,6 +306,10 @@ extern "C" NSString *const FIRFirestoreErrorDomain = @"FIRFirestoreErrorDomain";
   if (!documentPath) {
     FSTThrowInvalidArgument(@"Document path cannot be nil.");
   }
+  if ([documentPath containsString:@"//"]) {
+    FSTThrowInvalidArgument(@"Invalid path (%@). Paths must not contain // in them.", documentPath);
+  }
+
   [self ensureClientConfigured];
   const ResourcePath path = ResourcePath::FromString(util::MakeStringView(documentPath));
   return [FIRDocumentReference referenceWithPath:path firestore:self];
