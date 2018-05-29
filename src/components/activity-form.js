@@ -18,6 +18,7 @@ import {
 import CustomPicker from './utils/picker';
 import ActivityCard from './activity-card';
 import DateTimePicker from 'react-native-modal-datetime-picker';
+import firebase from 'react-native-firebase';
 
 type State = {
   name: string,
@@ -34,6 +35,7 @@ type State = {
   selectVisible: boolean,
   uuid: string,
   pubDate: Date,
+  imagesPickerVisible: boolean,
   coordinate: {
     latitude: number,
     longitude: number
@@ -67,8 +69,20 @@ class ActivityForm extends Component<Props, State> {
       latitude: 51.2365,
       longitude: 22.5584
     },
+    imagesPickerVisible: false,
     images: []
   };
+
+  componentDidMount() {
+    const storage = firebase
+      .storage()
+      .ref('/blur-community-crowd-5156.jpg')
+      .downloadFile(
+        `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/ok.jpeg`
+      )
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
 
   /*
     Structure of single activity:
@@ -210,7 +224,6 @@ class ActivityForm extends Component<Props, State> {
             <Text>Latitude: {this.state.coordinate.latitude}</Text>
             <Text>Longtitude: {this.state.coordinate.longitude}</Text>
             <Button
-              styleName="dark"
               onPress={() => {
                 navigation.navigate('ActivityMap', {
                   coordinates: this.initialCoordinates,
@@ -234,6 +247,16 @@ class ActivityForm extends Component<Props, State> {
               <Text>Choose location</Text>
             </Button>
             <Divider styleName="line" />
+            <Button
+              onPress={value =>
+                this.setState(state => ({
+                  ...state,
+                  imagesPickerVisible: true
+                }))
+              }
+            >
+              <Text>Choose images!</Text>
+            </Button>
             <Subtitle style={{ margin: 10 }}>
               Images you choose for event:
             </Subtitle>
@@ -261,7 +284,6 @@ class ActivityForm extends Component<Props, State> {
               style={{ margin: 15, backgroundColor: 'white' }}
             >
               <Button
-                styleName="secondary"
                 onPress={() =>
                   this.setState(state => ({ ...state, selectVisible: false }))
                 }
@@ -283,10 +305,27 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           )}
+          {this.state.imagesPickerVisible && (
+            <View
+              styleName="fill-parent"
+              style={{ margin: 15, backgroundColor: 'white' }}
+            >
+              <Button
+                onPress={() =>
+                  this.setState(state => ({
+                    ...state,
+                    imagesPickerVisible: false
+                  }))
+                }
+              >
+                <Text>Done</Text>
+              </Button>
+              <Text>Images will b e here!</Text>
+            </View>
+          )}
           {this.state.previewVisible && <ActivityCard {...this.state} />}
         </ScrollView>
         <Button
-          styleName="dark"
           style={{ margin: 10 }}
           onPress={() => {
             props.addItem(this.state);
