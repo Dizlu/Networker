@@ -33,7 +33,11 @@ type State = {
   previewVisible: boolean,
   selectVisible: boolean,
   uuid: string,
-  pubDate: Date
+  pubDate: Date,
+  coordinate: {
+    latitude: number,
+    longitude: number
+  }
 };
 
 type Props = {
@@ -57,7 +61,12 @@ class ActivityForm extends Component<Props, State> {
     selectVisible: false,
     dateTimePickerStartVisible: false,
     dateTimePickerEndVisible: false,
-    pubDate: new Date()
+    pubDate: new Date(),
+    // @TODO: map coordinates into location name
+    coordinate: {
+      latitude: 51.2365,
+      longitude: 22.5584
+    }
   };
 
   /*
@@ -129,17 +138,6 @@ class ActivityForm extends Component<Props, State> {
     longitudeDelta: 0.0221
   };
 
-  markers = [
-    {
-      coordinate: {
-        latitude: 51.2365,
-        longitude: 22.5584
-      },
-      title: 'Test marker',
-      description: 'Test marker longer description'
-    }
-  ];
-
   render() {
     const props = this.props.navigation.state.params;
     const navigation = this.props.navigation;
@@ -206,16 +204,36 @@ class ActivityForm extends Component<Props, State> {
               />
             </View>
           </View>
-          <Button
-            onPress={() => {
-              navigation.navigate('ActivityMap', {
-                coordinates: this.initialCoordinates,
-                markers: this.markers
-              });
-            }}
-          >
-            <Text>Choose location</Text>
-          </Button>
+          <Tile style={{ margin: 10, padding: 15 }}>
+            <Subtitle>Actual coordinates of event:</Subtitle>
+            <Text>Latitude: {this.state.coordinate.latitude}</Text>
+            <Text>Longtitude: {this.state.coordinate.longitude}</Text>
+            <Button
+              styleName="dark"
+              onPress={() => {
+                navigation.navigate('ActivityMap', {
+                  coordinates: this.initialCoordinates,
+                  markers: [
+                    {
+                      coordinate: this.state.coordinate,
+                      title: this.state.name,
+                      description: this.state.description
+                    }
+                  ],
+                  setCoordinates: coordinates => {
+                    console.log('setting some new coordinates: ', coordinates);
+                    this.setState(state => ({
+                      ...state,
+                      coordinate: coordinates
+                    }));
+                  }
+                });
+              }}
+            >
+              <Text>Choose location</Text>
+            </Button>
+          </Tile>
+
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
             minimumDate={new Date()}
@@ -263,6 +281,7 @@ class ActivityForm extends Component<Props, State> {
           {this.state.previewVisible && <ActivityCard {...this.state} />}
         </ScrollView>
         <Button
+          styleName="dark"
           style={{ margin: 10 }}
           onPress={() => {
             props.addItem(this.state);

@@ -64,11 +64,13 @@ class Category extends Component<Props, State> {
   componentDidMount() {
     const rssLink = this.props.link;
 
-    XMLParse(rssLink).then((parsedData: xmlItem) => {
-      this.setState(state => ({
-        activities: [...state.activities, ...parsedData.rss.channel.item]
-      }));
-    });
+    XMLParse(rssLink)
+      .then((parsedData: xmlItem) => {
+        this.setState(state => ({
+          activities: [...state.activities, ...parsedData.rss.channel.item]
+        }));
+      })
+      .catch(err => console.log('Request for XML failed', err));
     this.fetchEventsFromFirestore();
   }
 
