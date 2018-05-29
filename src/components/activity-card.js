@@ -42,7 +42,7 @@ const ActivityCard = (props: Props) => {
             <Caption>
               {' '}
               {new Date(props.start).toLocaleDateString()} -{' '}
-              {new Date(props.end).toLocaleTimeString()}{' '}
+              {new Date(props.start).toLocaleTimeString()}{' '}
             </Caption>
           </View>
         </View>

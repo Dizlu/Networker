@@ -66,7 +66,8 @@ class ActivityForm extends Component<Props, State> {
     coordinate: {
       latitude: 51.2365,
       longitude: 22.5584
-    }
+    },
+    images: []
   };
 
   /*
@@ -232,6 +233,10 @@ class ActivityForm extends Component<Props, State> {
             >
               <Text>Choose location</Text>
             </Button>
+            <Divider styleName="line" />
+            <Subtitle style={{ margin: 10 }}>
+              Images you choose for event:
+            </Subtitle>
           </Tile>
 
           <DateTimePicker
@@ -286,7 +291,8 @@ class ActivityForm extends Component<Props, State> {
           onPress={() => {
             props.addItem(this.state);
             navigation.goBack();
-            this.setState(state => ({ ...state, uuid: uuid() }));
+            //this.setState(state => ({ ...state, uuid: uuid() }));
+            // @TODO: add event to firestore here
           }}
         >
           <Text>Add event</Text>

@@ -82,6 +82,13 @@ class Category extends Component<Props, State> {
     this.props.navigation.navigate('EventDetail', event);
   };
 
+  addNewItemToFirestore(item) {
+    this.setState(state => ({
+      ...state,
+      activities: [...state.activities, item]
+    }));
+  }
+
   renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
 
   render() {
@@ -91,11 +98,7 @@ class Category extends Component<Props, State> {
           styleName="textual"
           onPress={() => {
             this.props.navigation.navigate('EventForm', {
-              addItem: item =>
-                this.setState(state => ({
-                  ...state,
-                  activities: [...state.activities, item]
-                }))
+              addItem: item => this.addNewItemToFirestore(item)
             });
           }}
         >

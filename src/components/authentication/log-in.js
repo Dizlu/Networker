@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { View } from "react-native";
-import firebase from "react-native-firebase";
+import React, { Component } from 'react';
+import { View } from 'react-native';
+import firebase from 'react-native-firebase';
 import {
   Button,
   Caption,
@@ -9,12 +9,24 @@ import {
   TextInput,
   Text,
   Heading
-} from "@shoutem/ui";
+} from '@shoutem/ui';
 //import { connect } from "react-redux";
+
+type Props = {
+  navigation: {
+    navigate: () => void
+  }
+};
+
+type State = {
+  email: string,
+  password: string,
+  user: Object | null
+};
 
 class Redirector extends Component {
   componentDidMount() {
-    this.props.navigation.navigate("Home", this.props.user);
+    this.props.navigation.navigate('Home', this.props.user);
   }
 
   render() {
@@ -22,7 +34,7 @@ class Redirector extends Component {
   }
 }
 
-export class LogIn extends Component {
+export class LogIn extends Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: <Title>Networker</Title>
@@ -30,8 +42,8 @@ export class LogIn extends Component {
   };
   unsubscriber = null;
   state = {
-    email: "",
-    password: "",
+    email: '',
+    password: '',
     user: null
   };
 
@@ -83,14 +95,14 @@ export class LogIn extends Component {
               Log in
             </Title>
             <TextInput
-              placeholder={"Username or email"}
+              placeholder={'Username or email'}
               onChangeText={text =>
                 this.setState(state => ({ ...state, email: text }))
               }
               autoCorrect={false}
             />
             <TextInput
-              placeholder={"Password"}
+              placeholder={'Password'}
               onChangeText={text =>
                 this.setState(state => ({ ...state, password: text }))
               }
