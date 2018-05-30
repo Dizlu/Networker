@@ -14,7 +14,8 @@ import {
   Tile,
   Divider,
   TouchableOpacity,
-  Title
+  Title,
+  InlineGallery
 } from '@shoutem/ui';
 import CustomPicker from './utils/picker';
 import ActivityCard from './activity-card';
@@ -182,7 +183,7 @@ class ActivityForm extends Component<Props, State> {
   render() {
     const props = this.props.navigation.state.params;
     const navigation = this.props.navigation;
-    const imagesText = this.state.images.map(image => ({
+    const imagesData = this.state.images.map(image => ({
       source: {
         uri: image
       }
@@ -321,7 +322,7 @@ class ActivityForm extends Component<Props, State> {
               </Subtitle>
             )}
           </Tile>
-          {this.state.images.length && imagesText}
+          {this.state.images.length && <InlineGallery data={imagesData} />}
 
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
