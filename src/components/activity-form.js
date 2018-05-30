@@ -13,7 +13,8 @@ import {
   Switch,
   Tile,
   Divider,
-  TouchableOpacity
+  TouchableOpacity,
+  Title
 } from '@shoutem/ui';
 import CustomPicker from './utils/picker';
 import ActivityCard from './activity-card';
@@ -39,12 +40,20 @@ type State = {
   coordinate: {
     latitude: number,
     longitude: number
-  }
+  },
+  images: Array<string>,
+  newImageUrl: string
 };
 
 type Props = {
   navigation: Object,
   addActivity: (state: Object<>) => void
+};
+
+const borderStyles = {
+  borderColor: '#eee',
+  borderRadius: 15,
+  borderWidth: 2
 };
 
 class ActivityForm extends Component<Props, State> {
@@ -70,13 +79,16 @@ class ActivityForm extends Component<Props, State> {
       longitude: 22.5584
     },
     imagesPickerVisible: false,
-    images: []
+    images: [
+      'https://shoutem.github.io/static/getting-started/restaurant-1.jpg'
+    ],
+    newImageUrl: ''
   };
 
   componentDidMount() {
     const storage = firebase
       .storage()
-      .ref('/blur-community-crowd-5156.jpg')
+      .ref('/pexels-photo-1020323.jpeg')
       .downloadFile(
         `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/ok.jpeg`
       )
@@ -153,9 +165,28 @@ class ActivityForm extends Component<Props, State> {
     longitudeDelta: 0.0221
   };
 
+  addImage() {
+    if (
+      !this.state.newImageUrl ||
+      this.state.images.some(image => image === this.state.newImageUrl)
+    ) {
+      return;
+    }
+    this.setState(state => ({
+      ...state,
+      images: [...state.images, state.newImageUrl],
+      newImageUrl: ''
+    }));
+  }
+
   render() {
     const props = this.props.navigation.state.params;
     const navigation = this.props.navigation;
+    const imagesText = this.state.images.map(image => ({
+      source: {
+        uri: image
+      }
+    }));
     return (
       <Screen>
         <ScrollView>
@@ -220,10 +251,13 @@ class ActivityForm extends Component<Props, State> {
             </View>
           </View>
           <Tile style={{ margin: 10, padding: 15 }}>
+            <Title> Coordinates</Title>
             <Subtitle>Actual coordinates of event:</Subtitle>
             <Text>Latitude: {this.state.coordinate.latitude}</Text>
             <Text>Longtitude: {this.state.coordinate.longitude}</Text>
             <Button
+              styleName="full-width"
+              style={{ ...borderStyles }}
               onPress={() => {
                 navigation.navigate('ActivityMap', {
                   coordinates: this.initialCoordinates,
@@ -246,8 +280,17 @@ class ActivityForm extends Component<Props, State> {
             >
               <Text>Choose location</Text>
             </Button>
-            <Divider styleName="line" />
+          </Tile>
+
+          <Tile style={{ margin: 10, padding: 15 }}>
+            <Title>Images of event: </Title>
             <Button
+              styleName="full-width"
+              style={{
+                ...borderStyles,
+                marginVertical: 15,
+                paddingVertical: 5
+              }}
               onPress={value =>
                 this.setState(state => ({
                   ...state,
@@ -257,10 +300,28 @@ class ActivityForm extends Component<Props, State> {
             >
               <Text>Choose images!</Text>
             </Button>
-            <Subtitle style={{ margin: 10 }}>
-              Images you choose for event:
-            </Subtitle>
+            <Subtitle>Enter url of image for event: </Subtitle>
+            <TextInput
+              autoCorrect={false}
+              placeholder={'Url of image...'}
+              onChangeText={newImageUrl =>
+                this.setState(state => ({ ...state, newImageUrl }))
+              }
+            />
+            <Button
+              style={{ ...borderStyles }}
+              styleName="full-width"
+              onPress={this.addImage.bind(this)}
+            >
+              <Text>Add image by URL</Text>
+            </Button>
+            {this.state.images.length && (
+              <Subtitle style={{ margin: 10 }}>
+                Images you choose for event:
+              </Subtitle>
+            )}
           </Tile>
+          {this.state.images.length && imagesText}
 
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
@@ -320,7 +381,7 @@ class ActivityForm extends Component<Props, State> {
               >
                 <Text>Done</Text>
               </Button>
-              <Text>Images will b e here!</Text>
+              <Text>Images will be here!</Text>
             </View>
           )}
           {this.state.previewVisible && <ActivityCard {...this.state} />}
