@@ -1,7 +1,6 @@
 // @flow
 import React, { Component } from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import uuid from 'uuid';
 import {
   Subtitle,
   Button,
@@ -23,26 +22,28 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import firebase from 'react-native-firebase';
 
 type State = {
-  name: string,
-  description: string,
+  author: string,
   category: {
     name: string,
     value: number
   },
-  start: Date,
+  description: string,
   end: Date,
+  images: Array<string>,
+  coordinate: {
+    // @TODO: rename to location
+    latitude: number,
+    longitude: number
+  },
+  name: string,
+  start: Date,
+
+  //View - based variables
   dateTimePickerStartVisible: boolean,
   dateTimePickerEndVisible: boolean,
   previewVisible: boolean,
   selectVisible: boolean,
-  uuid: string,
-  pubDate: Date,
   imagesPickerVisible: boolean,
-  coordinate: {
-    latitude: number,
-    longitude: number
-  },
-  images: Array<string>,
   newImageUrl: string
 };
 
@@ -59,30 +60,33 @@ const borderStyles = {
 
 class ActivityForm extends Component<Props, State> {
   state = {
-    name: 'Test - World Championship 2018',
-    description:
-      "Test - world's most anticipated event of century will take place in Russia, featuring the best players in the world like: Ronadlinho, Puson. Come and see them live!",
+    author: 'Admin',
     category: {
+      // @TODO: map to string
       name: 'Wydarzenie kulturalne',
       value: 1
     },
-    uuid: uuid(),
-    start: new Date(),
+    description:
+      "Test - world's most anticipated event of century will take place in Russia, featuring the best players in the world like: Ronadlinho, Puson. Come and see them live!",
     end: new Date(),
-    previewVisible: true,
-    selectVisible: false,
-    dateTimePickerStartVisible: false,
-    dateTimePickerEndVisible: false,
-    pubDate: new Date(),
+    images: [
+      'https://shoutem.github.io/static/getting-started/restaurant-1.jpg',
+      'https://shoutem.github.io/static/getting-started/restaurant-2.jpg'
+    ],
     // @TODO: map coordinates into location name
     coordinate: {
       latitude: 51.2365,
       longitude: 22.5584
     },
+    name: 'Test - World Championship 2018',
+    start: new Date(),
+
+    //UI Based constants
+    previewVisible: true,
+    selectVisible: false,
+    dateTimePickerStartVisible: false,
+    dateTimePickerEndVisible: false,
     imagesPickerVisible: false,
-    images: [
-      'https://shoutem.github.io/static/getting-started/restaurant-1.jpg'
-    ],
     newImageUrl: ''
   };
 
@@ -392,8 +396,8 @@ class ActivityForm extends Component<Props, State> {
           onPress={() => {
             props.addItem(this.state);
             navigation.goBack();
-            //this.setState(state => ({ ...state, uuid: uuid() }));
             // @TODO: add event to firestore here
+            // @TODO: get and set proper UUID!
           }}
         >
           <Text>Add event</Text>
