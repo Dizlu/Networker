@@ -90,15 +90,40 @@ class ActivityForm extends Component<Props, State> {
     newImageUrl: ''
   };
 
+  ref = firebase.firestore().collection('Events');
+  unsubscribe = null;
+
   componentDidMount() {
-    const storage = firebase
-      .storage()
-      .ref('/pexels-photo-1020323.jpeg')
-      .downloadFile(
-        `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/ok.jpeg`
-      )
-      .then(res => console.log(res))
-      .catch(err => console.log(err));
+    this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  onCollectionUpdate(querySnapshot) {
+    console.log(querySnapshot);
+  }
+
+  addNewEvent(event) {
+    const firebaseEvent = {
+      author: 'testAuthor',
+      category: event.category.name,
+      description: event.description,
+      end: event.end,
+      images: event.images,
+      location: event.coordinate,
+      name: event.name,
+      start: event.start,
+      peopleGoing: 0,
+      peopleInterested: 1 // i'm always interested :)
+    };
+
+    console.log(
+      'Adding new Event to Events collection in firestore: ',
+      firebaseEvent
+    );
+    this.ref.add(firebaseEvent);
   }
 
   /*
@@ -394,6 +419,7 @@ class ActivityForm extends Component<Props, State> {
         <Button
           style={{ margin: 10 }}
           onPress={() => {
+            this.addNewEvent(this.state);
             props.addItem(this.state);
             navigation.goBack();
             // @TODO: add event to firestore here
