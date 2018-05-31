@@ -38,6 +38,12 @@ type State = {
   name: string,
   start: Date,
 
+  //Firebase collection 'categories'
+  categories: Array<{
+    name: string,
+    value: number
+  }>,
+
   //View - based variables
   dateTimePickerStartVisible: boolean,
   dateTimePickerEndVisible: boolean,
@@ -82,6 +88,7 @@ class ActivityForm extends Component<Props, State> {
     start: new Date(),
 
     //UI Based constants
+    categories: [],
     previewVisible: true,
     selectVisible: false,
     dateTimePickerStartVisible: false,
@@ -91,21 +98,32 @@ class ActivityForm extends Component<Props, State> {
   };
 
   ref = firebase.firestore().collection('Events');
+  categoriesRef = firebase.firestore().collection('categories');
   unsubscribe = null;
+  unsubscribeCategories = null;
 
-  componentDidMount() {
-    this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
-  }
+  componentDidMount = () => {
+    this.unsubscribe = this.categoriesRef.onSnapshot(
+      this.onCategoriesCollectionUpdate
+    );
+  };
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     this.unsubscribe();
-  }
+  };
 
-  onCollectionUpdate(querySnapshot) {
-    console.log(querySnapshot);
-  }
+  onCategoriesCollectionUpdate = querySnapshot => {
+    const categories = [];
+    querySnapshot.forEach(doc => {
+      categories.push(doc.data());
+    });
+    this.setState(state => ({
+      ...state,
+      categories
+    }));
+  };
 
-  addNewEvent(event) {
+  addNewEvent = event => {
     const firebaseEvent = {
       author: 'testAuthor',
       category: event.category.name,
@@ -124,35 +142,7 @@ class ActivityForm extends Component<Props, State> {
       firebaseEvent
     );
     this.ref.add(firebaseEvent);
-  }
-
-  /*
-    Structure of single activity:
-   - Name of activity
-   - Description
-   - Time
-   - Category
-   - Location (Google Maps)
-   */
-
-  pickerOptions = [
-    {
-      name: 'Wydarzenie kulturalne',
-      value: 1
-    },
-    {
-      name: 'Turniej futbolowy',
-      value: 2
-    },
-    {
-      name: 'Przegląd talentów',
-      value: 3
-    },
-    {
-      name: 'Meetup IT',
-      value: 4
-    }
-  ];
+  };
 
   _showDateTimePickerStart = () => {
     this.setState(state => ({ ...state, dateTimePickerStartVisible: true }));
@@ -382,9 +372,9 @@ class ActivityForm extends Component<Props, State> {
                 <Text>Done</Text>
               </Button>
               <CustomPicker
-                options={this.pickerOptions}
+                options={this.state.categories}
                 onValueChange={(itemValue, itemIndex) => {
-                  const category = this.pickerOptions.find(
+                  const category = this.state.categories.find(
                     option => itemValue === option.value
                   );
                   this.setState(state => ({
