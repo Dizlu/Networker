@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { TouchableHighlight } from 'react-native';
-import { Tile, Title, Caption, View } from '@shoutem/ui';
+import { Divider, Tile, Title, Caption, View } from '@shoutem/ui';
 
 type Props = {
   img?: string,
@@ -18,9 +18,7 @@ type Props = {
 const ActivityCard = (props: Props) => {
   const { name, description, goToDetail } = props;
 
-  if (props.pubDate) {
-    props.start = props.pubDate;
-  }
+  const date = props.pubDate ? props.pubDate : props.start;
   return (
     <TouchableHighlight onPress={() => goToDetail && goToDetail(props)}>
       <Tile>
@@ -37,12 +35,12 @@ const ActivityCard = (props: Props) => {
           <View styleName="horizontal space-between">
             <Caption>
               {' '}
-              {(props.category && props.category.name) || 'Wydarzenie'}{' '}
+              {(props.category && props.category) || 'Brak kategorii'}{' '}
             </Caption>
             <Caption>
-              {' '}
-              {new Date(props.start).toLocaleDateString()} -{' '}
-              {new Date(props.start).toLocaleTimeString()}{' '}
+              {'Start: '}
+              {new Date(date).toLocaleDateString()} -{' '}
+              {new Date(date).toLocaleTimeString()}{' '}
             </Caption>
           </View>
         </View>
