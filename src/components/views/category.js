@@ -1,6 +1,15 @@
 // @flow
 import React, { Component } from 'react';
-import { Screen, ListView, Text, Button, Title, Caption } from '@shoutem/ui';
+import {
+  View,
+  Divider,
+  Screen,
+  ListView,
+  Text,
+  Button,
+  Title,
+  Caption
+} from '@shoutem/ui';
 import XMLParse from '../../../services/XMLParse';
 import ActivityCard from '../activity-card';
 
@@ -88,8 +97,12 @@ class Category extends Component<Props, State> {
       activities: [...state.activities, item]
     }));
   }
-
-  renderRow = item => <ActivityCard {...item} goToDetail={this.goToDetail} />;
+  renderRow = item => (
+    <View>
+      <ActivityCard {...item} goToDetail={this.goToDetail} />
+      <Divider styleName="line" />
+    </View>
+  );
 
   render() {
     return (
