@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { TouchableHighlight } from 'react-native';
-import { Divider, Tile, Title, Caption, View } from '@shoutem/ui';
+import { Tile, Title, Caption, View } from '@shoutem/ui';
 
 type Props = {
   img?: string,

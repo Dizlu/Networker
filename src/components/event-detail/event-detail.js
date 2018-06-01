@@ -8,9 +8,10 @@ import {
   Tile,
   Caption,
   Icon,
-  ImageBackground
+  ImageBackground,
+  InlineGallery
 } from '@shoutem/ui';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, ScrollView } from 'react-native';
 import ActivityMap from '../activity-map';
 
 type State = {
@@ -69,40 +70,28 @@ export default class EventDetail extends Component<State, Props> {
   render() {
     const state = this.props.navigation.state.params;
     const navigation = this.props.navigation;
-    console.log(state);
+    const images =
+      state.images &&
+      state.images.map(image => ({
+        source: {
+          uri: image
+        }
+      }));
+    console.log(images);
     return (
-      <Screen>
-        <ImageBackground
-          onLoad={() =>
-            this.setState(state => ({ ...state, imageLoaded: true }))
-          }
-          styleName="large-banner"
-          source={{
-            uri: state.gallery[0] || 'https://picsum.photos/600/600?random&blur'
-          }}
-        >
-          {this.state.imageLoaded && (
-            <Tile>
-              <View styleName="actions">
-                <Button styleName="tight clear">
-                  <Icon name="tweet" />
-                </Button>
-              </View>
-              <Title>{state.title}</Title>
-              <Caption>
-                {new Date(state.pubDate).toLocaleDateString()} -{' '}
-                {new Date(state.pubDate).toLocaleTimeString()}
-              </Caption>
-            </Tile>
-          )}
-          {!this.state.imageLoaded && (
-            <View styleName="actions">
-              <Caption>Loading event, please wait a second.</Caption>
-              <ActivityIndicator />
-            </View>
-          )}
-        </ImageBackground>
+      <ScrollView>
         <Tile>
+          <Title
+            style={{
+              marginTop: 20,
+              marginBottom: 20,
+              fontSize: 20,
+              textAlign: 'center',
+              alignSelf: 'center'
+            }}
+          >
+            {state.name}
+          </Title>
           <Text style={{ margin: 15 }}>{state.description}</Text>
           <Button
             styleName="dark"
@@ -113,10 +102,12 @@ export default class EventDetail extends Component<State, Props> {
               })
             }
           >
-            <Text>See on map</Text>
+            <Text>See location on map</Text>
           </Button>
+          {images && <Title>Gallery:</Title>}
         </Tile>
-      </Screen>
+        <InlineGallery data={images ? images : []} />
+      </ScrollView>
     );
   }
 }
