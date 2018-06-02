@@ -35,7 +35,8 @@ const ActivityCard = (props: Props) => {
           <View styleName="horizontal space-between">
             <Caption>
               {' '}
-              {(props.category && props.category) || 'Brak kategorii'}{' '}
+              {(props.category && props.category.name && props.category.name) ||
+                'Brak kategorii'}{' '}
             </Caption>
             <Caption>
               {'Start: '}

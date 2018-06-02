@@ -202,11 +202,13 @@ class ActivityForm extends Component<Props, State> {
   render() {
     const props = this.props.navigation.state.params;
     const navigation = this.props.navigation;
-    const imagesData = this.state.images.map(image => ({
-      source: {
-        uri: image
-      }
-    }));
+    const imagesData = this.state.images
+      ? this.state.images.map(image => ({
+          source: {
+            uri: image
+          }
+        }))
+      : [];
     return (
       <Screen>
         <ScrollView>
@@ -335,14 +337,15 @@ class ActivityForm extends Component<Props, State> {
             >
               <Text>Add image by URL</Text>
             </Button>
+          </Tile>
+          <Tile style={{ margin: 10, padding: 15 }}>
             {this.state.images.length && (
-              <Subtitle style={{ margin: 10 }}>
+              <Subtitle style={{ margin: 10, fontSize: 20 }}>
                 Images you choose for event:
               </Subtitle>
             )}
           </Tile>
           {this.state.images.length && <InlineGallery data={imagesData} />}
-
           <DateTimePicker
             isVisible={this.state.dateTimePickerStartVisible}
             minimumDate={new Date()}
@@ -412,8 +415,6 @@ class ActivityForm extends Component<Props, State> {
             this.addNewEvent(this.state);
             props.addItem(this.state);
             navigation.goBack();
-            // @TODO: add event to firestore here
-            // @TODO: get and set proper UUID!
           }}
         >
           <Text>Add event</Text>

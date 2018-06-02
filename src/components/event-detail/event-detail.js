@@ -23,7 +23,11 @@ type Props = {
     state: {
       params: {
         description: string,
-        image: string
+        image: string,
+        location: {
+          latitude: number,
+          longitude: number
+        }
       }
     }
   }
@@ -52,8 +56,8 @@ export default class EventDetail extends Component<State, Props> {
   initialCoordinates = {
     latitude: 51.2465,
     longitude: 22.5684,
-    latitudeDelta: 0.0422,
-    longitudeDelta: 0.0221
+    latitudeDelta: 0.0622,
+    longitudeDelta: 0.0421
   };
 
   markers = [
@@ -68,16 +72,16 @@ export default class EventDetail extends Component<State, Props> {
   ];
 
   render() {
-    const state = this.props.navigation.state.params;
+    const props = this.props.navigation.state.params;
     const navigation = this.props.navigation;
     const images =
-      state.images &&
-      state.images.map(image => ({
+      props.images &&
+      props.images.map(image => ({
         source: {
           uri: image
         }
       }));
-    console.log(images);
+    console.log(props);
     return (
       <ScrollView>
         <Tile>
@@ -90,15 +94,21 @@ export default class EventDetail extends Component<State, Props> {
               alignSelf: 'center'
             }}
           >
-            {state.name}
+            {props.name}
           </Title>
-          <Text style={{ margin: 15 }}>{state.description}</Text>
+          <Text style={{ margin: 15 }}>{props.description}</Text>
           <Button
             styleName="dark"
             onPress={() =>
               navigation.navigate('ActivityMap', {
                 coordinates: this.initialCoordinates,
-                markers: this.markers
+                markers: [
+                  {
+                    coordinate: props.location,
+                    title: props.name,
+                    description: props.description
+                  }
+                ]
               })
             }
           >
