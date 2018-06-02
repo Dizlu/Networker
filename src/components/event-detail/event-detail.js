@@ -9,7 +9,10 @@ import {
   Caption,
   Icon,
   ImageBackground,
-  InlineGallery
+  InlineGallery,
+  Subtitle,
+  Divider,
+  TouchableOpacity
 } from '@shoutem/ui';
 import { ActivityIndicator, ScrollView } from 'react-native';
 import ActivityMap from '../activity-map';
@@ -87,9 +90,9 @@ export default class EventDetail extends Component<State, Props> {
         <Tile>
           <Title
             style={{
-              marginTop: 20,
+              marginTop: 30,
               marginBottom: 20,
-              fontSize: 20,
+              fontSize: 25,
               textAlign: 'center',
               alignSelf: 'center'
             }}
@@ -97,6 +100,19 @@ export default class EventDetail extends Component<State, Props> {
             {props.name}
           </Title>
           <Text style={{ margin: 15 }}>{props.description}</Text>
+          <Tile style={{ margin: 15 }}>
+            <TouchableOpacity style={{ padding: 5 }}>
+              <Subtitle style={{ fontSize: 15 }}>
+                People interested: {props.peopleInterested}
+              </Subtitle>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ padding: 5 }}>
+              <Subtitle style={{ fontSize: 15 }}>
+                People going: {props.peopleGoing}
+              </Subtitle>
+            </TouchableOpacity>
+          </Tile>
+          <Divider />
           <Button
             styleName="dark"
             onPress={() =>
@@ -114,7 +130,9 @@ export default class EventDetail extends Component<State, Props> {
           >
             <Text>See location on map</Text>
           </Button>
-          {images && <Title>Gallery:</Title>}
+          {images && (
+            <Title style={{ fontSize: 20, margin: 15 }}>Gallery</Title>
+          )}
         </Tile>
         <InlineGallery data={images ? images : []} />
       </ScrollView>
