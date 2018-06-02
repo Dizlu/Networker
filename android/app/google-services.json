@@ -15,11 +15,13 @@
       },
       "oauth_client": [
         {
-          "client_id": "1033445735061-tmkngq6avlk0ufi03pt1om5f6pk6f9j4.apps.googleusercontent.com",
+          "client_id":
+            "1033445735061-tmkngq6avlk0ufi03pt1om5f6pk6f9j4.apps.googleusercontent.com",
           "client_type": 3
         },
         {
-          "client_id": "1033445735061-tmkngq6avlk0ufi03pt1om5f6pk6f9j4.apps.googleusercontent.com",
+          "client_id":
+            "1033445735061-tmkngq6avlk0ufi03pt1om5f6pk6f9j4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
