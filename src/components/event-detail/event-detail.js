@@ -128,6 +128,40 @@ export default class EventDetail extends Component<State, Props> {
       });
   }
 
+  addPersonInterested(ref) {
+    firebase
+      .firestore()
+      .runTransaction(async transaction => {
+        const doc = await transaction.get(ref);
+
+        if (!doc.exists) {
+          console.log('No document of given event!');
+          return undefined;
+        }
+
+        const newEvent = {
+          ...doc.data(),
+          peopleInterested: doc.data().peopleInterested + 1
+        };
+
+        transaction.update(ref, newEvent);
+        return newEvent;
+      })
+      .then(newEvent => {
+        console.log(
+          `Transaction successfully committed and new event is:`,
+          newEvent
+        );
+        this.setState(state => ({
+          ...state,
+          peopleInterested: newEvent.peopleInterested
+        }));
+      })
+      .catch(error => {
+        console.log('Transaction failed: ', error);
+      });
+  }
+
   render() {
     const navigation = this.props.navigation;
     const images =
@@ -141,14 +175,12 @@ export default class EventDetail extends Component<State, Props> {
       .firestore()
       .collection('Events')
       .doc(this.state.id);
-    console.log(this.state);
     return (
       <ScrollView>
         <Tile>
           <Title
             style={{
               marginTop: 30,
-              marginBottom: 20,
               fontSize: 25,
               textAlign: 'center',
               alignSelf: 'center'
@@ -157,24 +189,30 @@ export default class EventDetail extends Component<State, Props> {
             {this.state.name}
           </Title>
           <Text style={{ margin: 15 }}>{this.state.description}</Text>
-          <Tile style={{ margin: 15 }}>
-            <TouchableOpacity style={{ padding: 5 }}>
-              <Subtitle style={{ fontSize: 15 }}>
-                People interested: {this.state.peopleInterested}
-              </Subtitle>
-            </TouchableOpacity>
-            <TouchableOpacity
+          <Tile style={{ margin: 10 }}>
+            <Subtitle style={{ paddingTop: 5, fontSize: 17 }}>
+              People interested: {this.state.peopleInterested}
+            </Subtitle>
+            <Button
+              style={{ padding: 5 }}
+              onPress={() => this.addPersonInterested(ref)}
+            >
+              <Text>I'm interested</Text>
+              <Icon name="notifications" />
+            </Button>
+            <Subtitle style={{ paddingTop: 5, fontSize: 17 }}>
+              People going: {this.state.peopleGoing}
+            </Subtitle>
+            <Button
               style={{ padding: 5 }}
               onPress={() => this.addPersonGoing(ref)}
             >
-              <Subtitle style={{ fontSize: 15 }}>
-                People going: {this.state.peopleGoing}
-              </Subtitle>
-            </TouchableOpacity>
+              <Text> I want to go!</Text>
+              <Icon name="add-event" />
+            </Button>
           </Tile>
-          <Divider />
+          <Divider styleName="divider" />
           <Button
-            styleName="dark"
             onPress={() =>
               navigation.navigate('ActivityMap', {
                 coordinates: this.initialCoordinates,
