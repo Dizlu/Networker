@@ -20,7 +20,21 @@ import ActivityMap from '../activity-map';
 import firebase from 'react-native-firebase';
 
 type State = {
-  imageLoaded: boolean
+  imageLoaded: boolean,
+  author: string,
+  category: string,
+  description: string,
+  end: Date,
+  goToDetail: () => void,
+  id: string,
+  images: Array,
+  location: {
+    longtitude: number,
+    latitude: number
+  },
+  peopleGoing: number,
+  peopleInterested: number,
+  start: Date
 };
 
 type Props = {
@@ -54,9 +68,13 @@ export default class EventDetail extends Component<State, Props> {
     };
   };
 
-  state = {
-    imageLoaded: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      imageLoaded: false,
+      ...props.navigation.state.params
+    };
+  }
 
   initialCoordinates = {
     latitude: 51.2465,
@@ -111,11 +129,10 @@ export default class EventDetail extends Component<State, Props> {
   }
 
   render() {
-    const props = this.state;
     const navigation = this.props.navigation;
     const images =
-      props.images &&
-      props.images.map(image => ({
+      this.state.images &&
+      this.state.images.map(image => ({
         source: {
           uri: image
         }
@@ -123,7 +140,8 @@ export default class EventDetail extends Component<State, Props> {
     const ref = firebase
       .firestore()
       .collection('Events')
-      .doc(this.props.navigation.state.params.id);
+      .doc(this.state.id);
+    console.log(this.state);
     return (
       <ScrollView>
         <Tile>
@@ -136,13 +154,13 @@ export default class EventDetail extends Component<State, Props> {
               alignSelf: 'center'
             }}
           >
-            {props.name}
+            {this.state.name}
           </Title>
-          <Text style={{ margin: 15 }}>{props.description}</Text>
+          <Text style={{ margin: 15 }}>{this.state.description}</Text>
           <Tile style={{ margin: 15 }}>
             <TouchableOpacity style={{ padding: 5 }}>
               <Subtitle style={{ fontSize: 15 }}>
-                People interested: {props.peopleInterested}
+                People interested: {this.state.peopleInterested}
               </Subtitle>
             </TouchableOpacity>
             <TouchableOpacity
@@ -150,7 +168,7 @@ export default class EventDetail extends Component<State, Props> {
               onPress={() => this.addPersonGoing(ref)}
             >
               <Subtitle style={{ fontSize: 15 }}>
-                People going: {props.peopleGoing}
+                People going: {this.state.peopleGoing}
               </Subtitle>
             </TouchableOpacity>
           </Tile>
@@ -162,9 +180,9 @@ export default class EventDetail extends Component<State, Props> {
                 coordinates: this.initialCoordinates,
                 markers: [
                   {
-                    coordinate: props.location,
-                    title: props.name,
-                    description: props.description
+                    coordinate: this.state.location,
+                    title: this.state.name,
+                    description: this.state.description
                   }
                 ]
               })
