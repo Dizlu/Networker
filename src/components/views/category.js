@@ -62,7 +62,9 @@ class Category extends Component<Props, State> {
       .limit(limit)
       .get()
       .then(data => {
-        const mappedDocs = data.docs.map(doc => doc.data());
+        const mappedDocs = data.docs.map(doc => {
+          return { id: doc.id, ...doc.data() };
+        });
         this.setState(state => ({
           ...state,
           activities: [...mappedDocs, ...state.activities]

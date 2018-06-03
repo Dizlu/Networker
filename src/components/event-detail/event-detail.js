@@ -17,6 +17,8 @@ import {
 import { ActivityIndicator, ScrollView } from 'react-native';
 import ActivityMap from '../activity-map';
 
+import firebase from 'react-native-firebase';
+
 type State = {
   imageLoaded: boolean
 };
@@ -74,8 +76,42 @@ export default class EventDetail extends Component<State, Props> {
     }
   ];
 
+  addPersonGoing(ref) {
+    firebase
+      .firestore()
+      .runTransaction(async transaction => {
+        const doc = await transaction.get(ref);
+
+        if (!doc.exists) {
+          console.log('No document of given event!');
+          return undefined;
+        }
+
+        const newEvent = {
+          ...doc.data(),
+          peopleGoing: doc.data().peopleGoing + 1
+        };
+
+        transaction.update(ref, newEvent);
+        return newEvent;
+      })
+      .then(newEvent => {
+        console.log(
+          `Transaction successfully committed and new event is:`,
+          newEvent
+        );
+        this.setState(state => ({
+          ...state,
+          peopleGoing: newEvent.peopleGoing
+        }));
+      })
+      .catch(error => {
+        console.log('Transaction failed: ', error);
+      });
+  }
+
   render() {
-    const props = this.props.navigation.state.params;
+    const props = this.state;
     const navigation = this.props.navigation;
     const images =
       props.images &&
@@ -84,7 +120,10 @@ export default class EventDetail extends Component<State, Props> {
           uri: image
         }
       }));
-    console.log(props);
+    const ref = firebase
+      .firestore()
+      .collection('Events')
+      .doc(this.props.navigation.state.params.id);
     return (
       <ScrollView>
         <Tile>
@@ -106,7 +145,10 @@ export default class EventDetail extends Component<State, Props> {
                 People interested: {props.peopleInterested}
               </Subtitle>
             </TouchableOpacity>
-            <TouchableOpacity style={{ padding: 5 }}>
+            <TouchableOpacity
+              style={{ padding: 5 }}
+              onPress={() => this.addPersonGoing(ref)}
+            >
               <Subtitle style={{ fontSize: 15 }}>
                 People going: {props.peopleGoing}
               </Subtitle>
@@ -131,7 +173,7 @@ export default class EventDetail extends Component<State, Props> {
             <Text>See location on map</Text>
           </Button>
           {images && (
-            <Title style={{ fontSize: 20, margin: 15 }}>Gallery</Title>
+            <Title style={{ fontSize: 20, margin: 15 }}>Event gallery</Title>
           )}
         </Tile>
         <InlineGallery data={images ? images : []} />
