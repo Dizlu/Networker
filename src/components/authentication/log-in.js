@@ -66,6 +66,20 @@ export class LogIn extends Component<Props, State> {
       .catch(err => console.log(err));
   }
 
+  logInAnonymously() {
+    firebase
+      .auth()
+      .signInAnonymouslyAndRetrieveData()
+      .then(res => {
+        console.log(res);
+        this.setState(state => ({
+          ...state,
+          user: res.user
+        }));
+      })
+      .catch(err => console.log(err));
+  }
+
   registerWithEmail(state) {
     firebase
       .auth()
@@ -122,6 +136,13 @@ export class LogIn extends Component<Props, State> {
             onPress={() => this.registerWithEmail(this.state)}
           >
             <Text>Register</Text>
+          </Button>
+
+          <Button
+            style={{ margin: 5, marginLeft: 15 }}
+            onPress={() => this.logInAnonymously()}
+          >
+            <Text>Log in anonymously</Text>
           </Button>
         </View>
       );

@@ -72,25 +72,35 @@ class Category extends Component<Props, State> {
       });
   }
 
-  componentDidMount() {
+  state = {
+    user: {},
+    activities: []
+  };
+
+  componentDidMount = () => {
     const rssLink = this.props.link;
+
+    this.setState(state => ({
+      ...state,
+      user: this.props.navigation.state.params
+    }));
 
     XMLParse(rssLink)
       .then((parsedData: xmlItem) => {
         this.setState(state => ({
+          ...state,
           activities: [...state.activities, ...parsedData.rss.channel.item]
         }));
       })
       .catch(err => console.log('Request for XML failed', err));
     this.fetchEventsFromFirestore();
-  }
-
-  state = {
-    activities: []
   };
 
   goToDetail = event => {
-    this.props.navigation.navigate('EventDetail', event);
+    this.props.navigation.navigate('EventDetail', {
+      ...event,
+      user: this.state.user
+    });
   };
 
   addNewItemToFirestore(item) {
