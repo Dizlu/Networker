@@ -94,6 +94,31 @@ export default class EventDetail extends Component<State, Props> {
     }
   ];
 
+  componentDidMount = () => {
+    firebase
+      .firestore()
+      .collection('Events')
+      .doc(this.state.id)
+      .get()
+      .then(res => {
+        const data = res.data();
+
+        const isGoing = data.peopleGoingIds.some(
+          id => id === this.state.user.uid
+        );
+        const isInterested = data.peopleInterestedIds.some(
+          id => id === this.state.user.uid
+        );
+
+        this.setState(state => ({
+          ...state,
+          userData: data,
+          isInterested,
+          isGoing
+        }));
+      });
+  };
+
   addPersonGoing = ref => {
     firebase
       .firestore()
@@ -198,6 +223,12 @@ export default class EventDetail extends Component<State, Props> {
       .firestore()
       .collection('Events')
       .doc(this.state.id);
+    const data = firebase
+      .firestore()
+      .collection('Events')
+      .doc(this.state.id)
+      .get()
+      .then(res => console.log(res.data()));
     return (
       <ScrollView>
         <Tile>
