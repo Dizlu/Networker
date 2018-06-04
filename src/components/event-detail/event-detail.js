@@ -94,7 +94,7 @@ export default class EventDetail extends Component<State, Props> {
     }
   ];
 
-  addPersonGoing(ref) {
+  addPersonGoing = ref => {
     firebase
       .firestore()
       .runTransaction(async transaction => {
@@ -105,9 +105,19 @@ export default class EventDetail extends Component<State, Props> {
           return undefined;
         }
 
+        const alreadyDeclared = doc
+          .data()
+          .peopleGoingIds.some(id => id === this.state.user.uid);
+        if (alreadyDeclared) {
+          console.warn('You already want to go there!');
+          transaction.end();
+          return false;
+        }
+
         const newEvent = {
           ...doc.data(),
-          peopleGoing: doc.data().peopleGoing + 1
+          peopleGoing: doc.data().peopleGoing + 1,
+          peopleGoingIds: [...doc.data().peopleGoingIds, this.state.user.uid]
         };
 
         transaction.update(ref, newEvent);
@@ -126,9 +136,9 @@ export default class EventDetail extends Component<State, Props> {
       .catch(error => {
         console.log('Transaction failed: ', error);
       });
-  }
+  };
 
-  addPersonInterested(ref) {
+  addPersonInterested = ref => {
     firebase
       .firestore()
       .runTransaction(async transaction => {
@@ -136,12 +146,25 @@ export default class EventDetail extends Component<State, Props> {
 
         if (!doc.exists) {
           console.log('No document of given event!');
+          transaction.end();
           return undefined;
+        }
+
+        const alreadyDeclared = doc
+          .data()
+          .peopleInterestedIds.some(id => id === this.state.user.uid);
+        if (alreadyDeclared) {
+          console.warn('You are already interested to go there!');
+          return;
         }
 
         const newEvent = {
           ...doc.data(),
-          peopleInterested: doc.data().peopleInterested + 1
+          peopleInterested: doc.data().peopleInterested + 1,
+          peopleInterestedIds: [
+            ...doc.data().peopleGoingIds,
+            this.state.user.id
+          ]
         };
 
         transaction.update(ref, newEvent);
@@ -160,7 +183,7 @@ export default class EventDetail extends Component<State, Props> {
       .catch(error => {
         console.log('Transaction failed: ', error);
       });
-  }
+  };
 
   render() {
     const navigation = this.props.navigation;
