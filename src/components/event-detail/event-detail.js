@@ -135,7 +135,6 @@ export default class EventDetail extends Component<State, Props> {
           .peopleGoingIds.some(id => id === this.state.user.uid);
         if (alreadyDeclared) {
           console.warn('You already want to go there!');
-          transaction.end();
           return false;
         }
 
@@ -155,7 +154,9 @@ export default class EventDetail extends Component<State, Props> {
         );
         this.setState(state => ({
           ...state,
-          peopleGoing: newEvent.peopleGoing
+          peopleGoing: newEvent.peopleGoing,
+          peopleGoingIds: newEvent.peopleGoingIds,
+          isGoing: true
         }));
       })
       .catch(error => {
@@ -171,7 +172,6 @@ export default class EventDetail extends Component<State, Props> {
 
         if (!doc.exists) {
           console.log('No document of given event!');
-          transaction.end();
           return undefined;
         }
 
@@ -202,7 +202,9 @@ export default class EventDetail extends Component<State, Props> {
         );
         this.setState(state => ({
           ...state,
-          peopleInterested: newEvent.peopleInterested
+          peopleInterested: newEvent.peopleInterested,
+          isInterested: true,
+          peopleGoingIds: newEvent.peopleGoingIds
         }));
       })
       .catch(error => {
@@ -223,12 +225,8 @@ export default class EventDetail extends Component<State, Props> {
       .firestore()
       .collection('Events')
       .doc(this.state.id);
-    const data = firebase
-      .firestore()
-      .collection('Events')
-      .doc(this.state.id)
-      .get()
-      .then(res => console.log(res.data()));
+
+    console.log(this.state);
     return (
       <ScrollView>
         <Tile>
@@ -251,8 +249,17 @@ export default class EventDetail extends Component<State, Props> {
               style={{ padding: 5 }}
               onPress={() => this.addPersonInterested(ref)}
             >
-              <Text>I'm interested</Text>
-              <Icon name="notifications" />
+              <Text
+                style={{ color: this.state.isInterested ? 'red' : 'black' }}
+              >
+                {this.state.isInterested
+                  ? "I'm already interested"
+                  : 'I want to be counted as interested'}
+              </Text>
+              <Icon
+                style={{ color: this.state.isInterested ? 'red' : 'black' }}
+                name="notifications"
+              />
             </Button>
             <Subtitle style={{ paddingTop: 5, fontSize: 17 }}>
               People going: {this.state.peopleGoing}
@@ -261,8 +268,16 @@ export default class EventDetail extends Component<State, Props> {
               style={{ padding: 5 }}
               onPress={() => this.addPersonGoing(ref)}
             >
-              <Text> I want to go!</Text>
-              <Icon name="add-event" />
+              <Text style={{ color: this.state.isGoing ? 'red' : 'black' }}>
+                {' '}
+                {this.state.isGoing
+                  ? "I'm going!"
+                  : 'I want to be counted as going!'}
+              </Text>
+              <Icon
+                style={{ color: this.state.isGoing ? 'red' : 'black' }}
+                name="add-event"
+              />
             </Button>
           </Tile>
           <Divider styleName="divider" />
