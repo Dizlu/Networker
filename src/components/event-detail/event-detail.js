@@ -103,12 +103,14 @@ export default class EventDetail extends Component<State, Props> {
       .then(res => {
         const data = res.data();
 
-        const isGoing = data.peopleGoingIds.some(
-          id => id === this.state.user.uid
-        );
-        const isInterested = data.peopleInterestedIds.some(
-          id => id === this.state.user.uid
-        );
+        if (!data) return;
+
+        const isGoing =
+          data.peopleGoingIds &&
+          data.peopleGoingIds.some(id => id === this.state.user.uid);
+        const isInterested =
+          data.peopleInterestedIds &&
+          data.peopleInterestedIds.some(id => id === this.state.user.uid);
 
         this.setState(state => ({
           ...state,
@@ -226,7 +228,6 @@ export default class EventDetail extends Component<State, Props> {
       .collection('Events')
       .doc(this.state.id);
 
-    console.log(this.state);
     return (
       <ScrollView>
         <Tile>

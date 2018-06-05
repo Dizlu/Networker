@@ -134,7 +134,9 @@ class ActivityForm extends Component<Props, State> {
       name: event.name,
       start: event.start,
       peopleGoing: 0,
-      peopleInterested: 1 // i'm always interested :)
+      peopleInterested: 1, // i'm always interested :)
+      peopleGoingIds: [],
+      peopleInterestedIds: []
     };
 
     console.log(
