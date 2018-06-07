@@ -2,6 +2,7 @@
 import React, { Component } from 'React';
 import { Image } from 'react-native';
 import { View, Title, Text, Tile, Button, Screen, Subtitle } from '@shoutem/ui';
+import firebase from 'react-native-firebase';
 
 type Props = {
   navigation: Object,
@@ -19,6 +20,20 @@ export default class Profile extends Component<Props> {
   ) {
     super(props);
     this.props = props;
+  }
+
+  componentDidMount() {
+    const httpsCallable = firebase.functions().httpsCallable('myFooBarFn');
+
+    httpsCallable({ some: 'args' })
+      .then(({ data }) => {
+        console.log(data); // hello world
+      })
+      .catch(httpsError => {
+        console.log(httpsError.code); // invalid-argument
+        console.log(httpsError.message); // Your error message goes here
+        console.log(httpsError.details.foo); // bar
+      });
   }
 
   render() {
