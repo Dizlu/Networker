@@ -10,6 +10,7 @@ target 'Networker' do
   pod 'Firebase/Auth'
   pod 'Firebase/Firestore'
   pod 'Firebase/Storage'
+  pod 'Firebase/Functions'
 
   pod 'React', path: rn_path, subspecs: [
     'Core',

@@ -106,6 +106,21 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+        release {
+            if (project.hasProperty('NETWORKER_RELEASE_STORE_FILE')) {
+                storeFile file(NETWORKER_RELEASE_STORE_FILE)
+                storePassword NETWORKER_RELEASE_STORE_PASSWORD
+                keyAlias NETWORKER_RELEASE_KEY_ALIAS
+                keyPassword NETWORKER_RELEASE_KEY_PASSWORD
+            }
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
     splits {
         abi {
             reset()

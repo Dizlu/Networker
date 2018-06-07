@@ -18,6 +18,9 @@ PODS:
   - Firebase/Firestore (5.1.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (= 0.12.2)
+  - Firebase/Functions (5.1.0):
+    - Firebase/CoreOnly
+    - FirebaseFunctions (= 2.0.0)
   - Firebase/Storage (5.1.0):
     - Firebase/CoreOnly
     - FirebaseStorage (= 3.0.0)
@@ -42,6 +45,9 @@ PODS:
     - gRPC-ProtoRPC (~> 1.0)
     - leveldb-library (~> 1.18)
     - Protobuf (~> 3.1)
+  - FirebaseFunctions (2.0.0):
+    - FirebaseCore (~> 5.0)
+    - GTMSessionFetcher/Core (~> 1.1)
   - FirebaseInstanceID (3.0.0):
     - FirebaseCore (~> 5.0)
   - FirebaseStorage (3.0.0):
@@ -141,6 +147,7 @@ DEPENDENCIES:
   - Firebase/Auth
   - Firebase/Core
   - Firebase/Firestore
+  - Firebase/Functions
   - Firebase/Storage
   - Google-Maps-iOS-Utils
   - GoogleMaps
@@ -179,6 +186,7 @@ SPEC CHECKSUMS:
   FirebaseAuth: acbeef02fe7c3a26624e309849f3fe30c84115af
   FirebaseCore: b81044df1044c0857a0737c6324678b72d4f7f00
   FirebaseFirestore: 93b8bf70484c92c271ae93940fe1e2ca9e35f92b
+  FirebaseFunctions: 141da172b7491276d9da8715b8ca88f9e439ffb6
   FirebaseInstanceID: 83e0040351565df711a5db3d8ebe5ea21aca998a
   FirebaseStorage: 7ca4bb7b58a25fa647b04f524033fc7cb7eb272b
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
@@ -197,6 +205,6 @@ SPEC CHECKSUMS:
   react-native-maps: 066c2afcc89e18726377bcc685315f989ca22449
   yoga: 55da126afc384965b96bff46652464373b330add
 
-PODFILE CHECKSUM: 8be7417522716635946069632fa6ded634bcdd75
+PODFILE CHECKSUM: 079dce2268f45fac414acc5f4874d5ca7be64074
 
 COCOAPODS: 1.4.0
