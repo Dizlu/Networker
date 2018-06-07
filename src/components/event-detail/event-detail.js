@@ -228,6 +228,18 @@ export default class EventDetail extends Component<State, Props> {
       .collection('Events')
       .doc(this.state.id);
 
+    let geo_marker = null;
+    const geo_success = success => {
+      geo_marker = {
+        latitude: success.coords.latitude,
+        longitude: success.coords.longitude
+      };
+      console.log(geo_marker);
+    };
+    navigator.geolocation.getCurrentPosition(geo_success, err => {
+      console.log(err);
+    });
+
     return (
       <ScrollView>
         <Tile>
@@ -288,7 +300,7 @@ export default class EventDetail extends Component<State, Props> {
                 coordinates: this.initialCoordinates,
                 markers: [
                   {
-                    coordinate: this.state.location,
+                    coordinate: geo_marker || this.state.location,
                     title: this.state.name,
                     description: this.state.description
                   }
